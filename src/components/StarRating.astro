@@ -1,0 +1,47 @@
+---
+const { rating, size = "md", showValue = false } = Astro.props as {
+  rating: number;
+  size?: "sm" | "md" | "lg";
+  showValue?: boolean;
+};
+
+const full = Math.floor(rating);
+const half = rating - full >= 0.25 && rating - full < 0.75;
+const fullCount = half ? full : Math.round(rating);
+const halfCount = half ? 1 : 0;
+const emptyCount = 5 - fullCount - halfCount;
+
+const sizeClass = size === "sm" ? "w-3.5 h-3.5" : size === "lg" ? "w-6 h-6" : "w-4 h-4";
+---
+
+<span class="inline-flex items-center gap-1" aria-label={`Rated ${rating} out of 5`}>
+  <span class="inline-flex items-center gap-0.5 text-amber-400">
+    {Array.from({ length: fullCount }).map(() => (
+      <svg class={sizeClass} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M10 15.27 16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
+      </svg>
+    ))}
+    {halfCount === 1 && (
+      <svg class={sizeClass} viewBox="0 0 20 20" aria-hidden="true">
+        <defs>
+          <linearGradient id="half-star-grad">
+            <stop offset="50%" stop-color="currentColor" />
+            <stop offset="50%" stop-color="#e5e7eb" />
+          </linearGradient>
+        </defs>
+        <path
+          fill="url(#half-star-grad)"
+          d="M10 15.27 16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z"
+        />
+      </svg>
+    )}
+    {Array.from({ length: emptyCount }).map(() => (
+      <svg class={`${sizeClass} text-gray-200`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M10 15.27 16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
+      </svg>
+    ))}
+  </span>
+  {showValue && (
+    <span class="text-sm font-semibold text-gray-700 ml-1">{rating.toFixed(1)}</span>
+  )}
+</span>

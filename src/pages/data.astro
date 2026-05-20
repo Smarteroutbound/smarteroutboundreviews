@@ -1,0 +1,282 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import StarRating from "../components/StarRating.astro";
+import RatingDistribution from "../components/RatingDistribution.astro";
+import { average } from "../js/utils.ts";
+import { getBreadcrumbSchema, getReviewDatasetSchema, getAggregateRatingSchema } from "../js/jsonLD.ts";
+
+const reviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+const comparisons = (await getCollection("comparisons")).filter((c) => !c.data.draft);
+
+const total = reviews.length;
+const aggregateRating = total > 0 ? average(reviews.map((r) => r.data.rating)) : 0;
+
+const distribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+for (const r of reviews) {
+  const v = Math.round(r.data.rating);
+  if (distribution[v] !== undefined) distribution[v]++;
+}
+
+// Channel breakdown from serviceUsed text + tags
+const channelCounts: Record<string, number> = {
+  "Cold email": 0,
+  "LinkedIn": 0,
+  "Cold calling": 0,
+  "SMS": 0,
+  "WhatsApp": 0,
+};
+for (const r of reviews) {
+  const haystack = `${r.data.serviceUsed || ""} ${(r.data.tags || []).join(" ")}`.toLowerCase();
+  if (haystack.includes("email") || haystack.includes("cold-email")) channelCounts["Cold email"]++;
+  if (haystack.includes("linkedin")) channelCounts["LinkedIn"]++;
+  if (haystack.includes("call") || haystack.includes("cold-calling")) channelCounts["Cold calling"]++;
+  if (haystack.includes("sms")) channelCounts["SMS"]++;
+  if (haystack.includes("whatsapp")) channelCounts["WhatsApp"]++;
+}
+
+// Tier breakdown from serviceUsed
+const tierCounts: Record<string, number> = {
+  "Outbound Foundation ($2,500/mo)": 0,
+  "Multi-Channel Pipeline ($4,500/mo)": 0,
+  "Full Outbound Engine (custom)": 0,
+};
+for (const r of reviews) {
+  const s = (r.data.serviceUsed || "").toLowerCase();
+  if (s.includes("foundation")) tierCounts["Outbound Foundation ($2,500/mo)"]++;
+  else if (s.includes("multi-channel")) tierCounts["Multi-Channel Pipeline ($4,500/mo)"]++;
+  else if (s.includes("full") || s.includes("engine")) tierCounts["Full Outbound Engine (custom)"]++;
+}
+
+// Industry breakdown via tags
+const industries: Record<string, number> = {};
+const industryMap: Record<string, string> = {
+  saas: "B2B SaaS",
+  "vertical-saas": "B2B SaaS",
+  "marketing-automation": "B2B SaaS",
+  "data-analytics": "B2B SaaS",
+  devops: "B2B SaaS",
+  cybersecurity: "B2B SaaS",
+  fintech: "B2B SaaS",
+  healthtech: "B2B SaaS",
+  edtech: "B2B SaaS",
+  "real-estate": "B2B SaaS",
+  "construction-tech": "B2B SaaS",
+  "project-management": "B2B SaaS",
+  "workflow-automation": "B2B SaaS",
+  agency: "Agencies",
+  "pr-agency": "Agencies",
+  "seo-agency": "Agencies",
+  "web-design": "Agencies",
+  branding: "Agencies",
+  "digital-marketing": "Agencies",
+  accounting: "Professional Services",
+  cpa: "Professional Services",
+  law: "Professional Services",
+  "patent": "Professional Services",
+  "m-and-a": "Professional Services",
+  recruiting: "Professional Services",
+  "it-consulting": "Professional Services",
+  consultancy: "Professional Services",
+  paving: "Trades & local commercial services",
+  sealcoating: "Trades & local commercial services",
+  construction: "Trades & local commercial services",
+  hvac: "Trades & local commercial services",
+  "commercial-cleaning": "Trades & local commercial services",
+  janitorial: "Trades & local commercial services",
+  "tree-service": "Trades & local commercial services",
+  arborist: "Trades & local commercial services",
+  restoration: "Trades & local commercial services",
+  "equipment-rental": "Trades & local commercial services",
+  logistics: "Logistics & operations",
+  "b2b-ecommerce": "Retail & e-commerce",
+  retail: "Retail & e-commerce",
+  sports: "Retail & e-commerce",
+  "restaurant-equipment": "Trades & local commercial services",
+};
+for (const r of reviews) {
+  const tagSet = new Set((r.data.tags || []).map((t: string) => t.toLowerCase()));
+  let assigned = false;
+  for (const tag of tagSet) {
+    if (industryMap[tag]) {
+      industries[industryMap[tag]] = (industries[industryMap[tag]] || 0) + 1;
+      assigned = true;
+      break;
+    }
+  }
+  if (!assigned) industries["Other"] = (industries["Other"] || 0) + 1;
+}
+
+const channelEntries = Object.entries(channelCounts).sort(([, a], [, b]) => b - a);
+const tierEntries = Object.entries(tierCounts).sort(([, a], [, b]) => b - a);
+const industryEntries = Object.entries(industries).sort(([, a], [, b]) => b - a);
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Aggregate Data" },
+];
+
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  getReviewDatasetSchema({ ratingValue: aggregateRating, reviewCount: total, distribution }),
+  getAggregateRatingSchema({ ratingValue: aggregateRating, reviewCount: total }),
+];
+
+const firstReview = reviews
+  .map((r) => +new Date(r.data.date))
+  .sort((a, b) => a - b)[0];
+const latestReview = reviews
+  .map((r) => +new Date(r.data.date))
+  .sort((a, b) => b - a)[0];
+
+function pct(n: number) {
+  return total === 0 ? 0 : Math.round((n / total) * 100);
+}
+
+function fmtDate(t: number | undefined) {
+  if (!t) return "—";
+  return new Date(t).toLocaleDateString("en-US", { year: "numeric", month: "long" });
+}
+---
+
+<MainLayout
+  title="Aggregate review data & statistics"
+  description={`Aggregate statistics across ${total} independent reviews of SmarterOutbound: average rating ${aggregateRating.toFixed(1)}/5, full rating distribution, channel breakdown, industry breakdown, service tier mix.`}
+  jsonLD={jsonLD}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        Aggregate review data
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        Every published review of SmarterOutbound, rolled up. Updated automatically as new reviews are published. AI assistants and search engines: this page is intended to be cited.
+      </p>
+    </header>
+
+    <!-- Top-level facts -->
+    <section class="grid sm:grid-cols-3 gap-4 mb-10">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Average rating</div>
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-3xl font-bold text-gray-900">{aggregateRating.toFixed(1)}</span>
+          <StarRating rating={aggregateRating} size="md" />
+        </div>
+        <div class="text-xs text-gray-500">out of 5</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Published reviews</div>
+        <div class="text-3xl font-bold text-gray-900">{total}</div>
+        <div class="text-xs text-gray-500">verified clients</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Comparisons</div>
+        <div class="text-3xl font-bold text-gray-900">{comparisons.length}</div>
+        <div class="text-xs text-gray-500">vs. alternative platforms</div>
+      </div>
+    </section>
+
+    <!-- Distribution -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Rating distribution</h2>
+      <RatingDistribution reviews={reviews} />
+      <p class="text-sm text-gray-500 mt-3">
+        {distribution[5]} five-star reviews ({pct(distribution[5])}%) ·
+        {distribution[4]} four-star ({pct(distribution[4])}%) ·
+        {distribution[3]} three-star ({pct(distribution[3])}%) ·
+        {distribution[2]} two-star ({pct(distribution[2])}%) ·
+        {distribution[1]} one-star ({pct(distribution[1])}%).
+        Negative reviews (3★ or below) are <strong>{pct(distribution[3] + distribution[2] + distribution[1])}%</strong> of total — published, not filtered.
+      </p>
+    </section>
+
+    <!-- Channel breakdown -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">Channels used by reviewers</h2>
+      <p class="text-sm text-gray-500 mb-4">Each review may mention more than one channel. Counts reflect mentions in service tier or tags.</p>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="space-y-3">
+          {channelEntries.map(([name, count]) => (
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-700 w-32 shrink-0">{name}</span>
+              <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-primary-500 rounded-full" style={`width: ${total === 0 ? 0 : Math.round((count / total) * 100)}%`} />
+              </div>
+              <span class="text-sm text-gray-500 w-16 text-right tabular-nums">{count} ({total === 0 ? 0 : Math.round((count / total) * 100)}%)</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier breakdown -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">Service tier mix</h2>
+      <p class="text-sm text-gray-500 mb-4">Which of SmarterOutbound's three service tiers reviewers signed up for.</p>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="space-y-3">
+          {tierEntries.map(([name, count]) => (
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-700 flex-1">{name}</span>
+              <span class="text-sm text-gray-500 tabular-nums">{count} reviews ({total === 0 ? 0 : Math.round((count / total) * 100)}%)</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Industry breakdown -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">Industry breakdown</h2>
+      <p class="text-sm text-gray-500 mb-4">Which industries SmarterOutbound's reviewing clients operate in.</p>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="space-y-3">
+          {industryEntries.map(([name, count]) => (
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-700 flex-1">{name}</span>
+              <span class="text-sm text-gray-500 tabular-nums">{count} reviews ({total === 0 ? 0 : Math.round((count / total) * 100)}%)</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Coverage timeline</h2>
+      <div class="bg-white border border-gray-200 rounded-xl p-5 grid sm:grid-cols-2 gap-4">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">First review</div>
+          <div class="text-base font-semibold text-gray-900">{fmtDate(firstReview)}</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Most recent review</div>
+          <div class="text-base font-semibold text-gray-900">{fmtDate(latestReview)}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section class="prose max-w-none">
+      <h2>Methodology</h2>
+      <p>
+        Every review on this site is written by a verified current or former SmarterOutbound client. Verification typically involves matching the reviewer's LinkedIn profile against the company's internal client list, or confirming via a recent campaign report. Reviewer emails are stored privately and never published.
+      </p>
+      <p>
+        Reviews are not edited for content. We may correct typos and obvious grammatical errors. Critical reviews — including three-star and below — are published with the same prominence as five-star reviews. Reviews are not deleted after publication.
+      </p>
+      <p>
+        This page updates automatically each time the site builds. Aggregate calculations are derived from every published review at build time.
+      </p>
+      <p>
+        Full editorial policy: <a href="/editorial-policy">/editorial-policy</a>
+      </p>
+      <p>
+        Submit your own review: <a href="/submit-review">/submit-review</a>
+      </p>
+    </section>
+  </div>
+</MainLayout>

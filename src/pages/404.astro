@@ -1,0 +1,28 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+---
+
+<MainLayout
+  title="Page not found"
+  description="The page you're looking for doesn't exist."
+  robots="noindex"
+>
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+    <div class="text-6xl font-extrabold text-primary-600 mb-3">404</div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">Page not found</h1>
+    <p class="text-gray-600 mb-8">
+      That page doesn't exist or has moved. Here are some places to go instead.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a href="/" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors no-underline">
+        Home
+      </a>
+      <a href="/reviews" class="bg-white border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-700 font-semibold px-5 py-2.5 rounded-lg transition-colors no-underline">
+        All reviews
+      </a>
+      <a href="/vs" class="bg-white border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-700 font-semibold px-5 py-2.5 rounded-lg transition-colors no-underline">
+        Comparisons
+      </a>
+    </div>
+  </div>
+</MainLayout>

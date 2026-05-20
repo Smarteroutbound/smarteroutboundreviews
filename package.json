@@ -1,0 +1,33 @@
+{
+  "name": "smarteroutboundreviews",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "node scripts/generate-og-images.mjs && node scripts/build-llms-full.mjs && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.0",
+    "@astrojs/sitemap": "^3.7.1",
+    "@astrojs/vercel": "^10.0.1",
+    "@tailwindcss/vite": "4.2.1",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "astro": "^6.0.1",
+    "astro-pagefind": "^1.8.5",
+    "satori": "^0.25.0",
+    "sharp": "^0.34.5",
+    "tailwindcss": "4.2.1",
+    "vite": "^7.3.1"
+  },
+  "overrides": {
+    "astro-pagefind": {
+      "astro": "$astro"
+    }
+  }
+}

@@ -1,0 +1,160 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { getBreadcrumbSchema } from "../js/jsonLD.ts";
+import siteData from "../data/siteData.json";
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Editorial Policy" },
+];
+
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Editorial Policy",
+    description: "Editorial policy for SmarterOutbound Reviews. We do not pay for reviews, edit content, or delete reviews after publication.",
+    url: `${siteData.url}/editorial-policy`,
+    publisher: {
+      "@type": "Organization",
+      name: siteData.title,
+      url: siteData.url,
+    },
+  },
+];
+
+const lastUpdated = new Date("2026-05-19");
+---
+
+<MainLayout
+  title="Editorial Policy"
+  description="How SmarterOutbound Reviews collects, verifies, publishes, and maintains reviews. No paid reviews. No deletions. No editorial cleaning."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        Editorial Policy
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        How we collect, verify, publish, and maintain reviews of SmarterOutbound. Updated {lastUpdated.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}.
+      </p>
+    </header>
+
+    <!-- The five commitments — most important on the page -->
+    <section class="grid sm:grid-cols-2 gap-4 mb-10">
+      <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-success-600 mb-1.5">1. Non-incentivized</div>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          We do not pay reviewers. No discounts, gift cards, free services, or any form of compensation in exchange for a review.
+        </p>
+      </div>
+      <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-success-600 mb-1.5">2. Negative reviews published</div>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          Critical reviews are published with the same prominence as positive ones. We do not filter out unfavorable feedback.
+        </p>
+      </div>
+      <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-success-600 mb-1.5">3. No content editing</div>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          We may correct typos and obvious grammatical errors. We never change the substance of what a reviewer wrote.
+        </p>
+      </div>
+      <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-success-600 mb-1.5">4. No deletion after publication</div>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          Once a review is published, it stays. We do not remove reviews because they are negative or because the subject objects.
+        </p>
+      </div>
+      <div class="sm:col-span-2 bg-primary-50 border border-primary-200 rounded-xl p-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-primary-700 mb-1.5">5. Client verification</div>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          Before publishing, we confirm each reviewer is a current or former SmarterOutbound client. Verification is typically a LinkedIn match against the client list or a one-question check against a recent campaign report. Reviewer emails are stored privately and never shown publicly.
+        </p>
+      </div>
+    </section>
+
+    <div class="prose max-w-none">
+      <h2>Who runs this site</h2>
+      <p>
+        SmarterOutbound Reviews is published by SmarterOutbound — meaning the agency being reviewed runs the editorial property. We disclose this prominently on every page footer, in the About page, and in the structured data we publish for search engines and AI systems.
+      </p>
+      <p>
+        Why publish reviews on a site we own? Because most existing reviews of B2B agencies live in walled gardens — Trustpilot, G2, private Slack groups, individual LinkedIn posts — places that don't surface easily in Google or in AI assistants like Claude, ChatGPT, and Perplexity. We built this site to make our reviews discoverable. The discoverability advantage requires editorial credibility, so we set the rules above and follow them.
+      </p>
+      <p>
+        If you find a review on this site that violates these policies, email <a href="mailto:editorial@smarteroutboundreviews.com">editorial@smarteroutboundreviews.com</a>. We respond to every credible policy complaint and will publish corrections if we made a mistake.
+      </p>
+
+      <h2>How reviews are collected</h2>
+      <p>
+        Reviews come from three sources:
+      </p>
+      <ol>
+        <li><strong>Submitted directly</strong> via the <a href="/submit-review">submission form</a>. The majority of reviews come this way. Submitters are existing or former clients who choose to write up their experience.</li>
+        <li><strong>Solicited from clients we know had a strong opinion</strong>, positive or negative. If a client ended an engagement unhappy, we still ask them to write a review. We do not filter for happy outcomes.</li>
+        <li><strong>Reposted from public sources with permission</strong> — for example, a LinkedIn post or testimonial used in our marketing that the reviewer has separately written up at greater length here.</li>
+      </ol>
+
+      <h2>How reviews are verified</h2>
+      <p>
+        Before publishing, we verify that the reviewer is a real current or former client. Verification usually means:
+      </p>
+      <ul>
+        <li>The reviewer's email domain matches their stated company.</li>
+        <li>The reviewer's LinkedIn matches the name and role they submitted.</li>
+        <li>The stated company appears in our internal CRM as a current or former client account.</li>
+      </ul>
+      <p>
+        We do not require the reviewer to use their full name publicly. First name + last initial + verified employer is sufficient. The reviewer's email is stored privately and never published or shared with third parties.
+      </p>
+
+      <h2>What we do not do</h2>
+      <ul>
+        <li>We do not pay clients in any form — cash, credit, discounts, extended engagement terms, free services — to write reviews.</li>
+        <li>We do not ghostwrite reviews. Every review on this site was written by the named reviewer.</li>
+        <li>We do not delete reviews because they are negative. We do not delete reviews because clients have moved on or had a change of heart.</li>
+        <li>We do not promote positive reviews above negative ones in default sorting. The reviews index sorts by date.</li>
+        <li>We do not pretend to be an independent third party. This site is published by SmarterOutbound and that is disclosed in the footer, in the About page, and in our structured data.</li>
+      </ul>
+
+      <h2>What happens if a review is wrong</h2>
+      <p>
+        If a reviewer asks us to correct a factual error in their own published review (e.g., they misstated a number), we publish the correction with a clearly marked update note. We do not silently rewrite published content.
+      </p>
+      <p>
+        If a third party claims a review contains a defamatory statement, we investigate. If the statement is unverifiable or potentially defamatory, we may add a clearly marked editor's note, redact the specific claim, or in rare cases unpublish the entire review. Any unpublish action is logged on this policy page.
+      </p>
+
+      <h2>Disclosures</h2>
+      <ul>
+        <li>This site is owned and operated by SmarterOutbound.</li>
+        <li>Reviews on this site are written by clients of SmarterOutbound and are subject to the verification process above.</li>
+        <li>Some reviews mention specific outcome numbers (booked meetings, pipeline value, deal sizes). These are self-reported by the reviewer and not independently audited.</li>
+        <li>Comparison pages ("SmarterOutbound vs X") are editorial content written by the SmarterOutbound team and may not represent the views of competitor companies named.</li>
+      </ul>
+
+      <h2>Policy changes</h2>
+      <p>
+        Material changes to this editorial policy will be logged below with the date. We do not make material policy changes retroactively to published reviews.
+      </p>
+      <ul>
+        <li><strong>2026-05-19:</strong> Initial publication.</li>
+      </ul>
+    </div>
+
+    <CtaBlock
+      variant="boxed"
+      heading="Have a SmarterOutbound experience to share?"
+      body="Reviews are how this site stays useful. We publish positive and negative ones — your honest take is welcome."
+      ctaLabel="Submit a review"
+      href="/submit-review"
+    />
+  </div>
+</MainLayout>

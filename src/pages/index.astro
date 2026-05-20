@@ -1,0 +1,327 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "../layouts/MainLayout.astro";
+import StarRating from "../components/StarRating.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { formatDate, average } from "../js/utils.ts";
+import {
+  getWebsiteSchema,
+  getOrganizationWithRatingSchema,
+  getReviewDatasetSchema,
+} from "../js/jsonLD.ts";
+import siteData from "../data/siteData.json";
+import TrustBadges from "../components/TrustBadges.astro";
+import RatingDistribution from "../components/RatingDistribution.astro";
+
+const allReviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+const allComparisons = (await getCollection("comparisons")).filter(
+  (c) => !c.data.draft,
+);
+
+const sortedReviews = allReviews.sort(
+  (a, b) => +new Date(b.data.date) - +new Date(a.data.date),
+);
+const featuredReviews = sortedReviews
+  .filter((r) => r.data.featured)
+  .concat(sortedReviews.filter((r) => !r.data.featured))
+  .slice(0, 4);
+
+const aggregateRating = allReviews.length > 0 ? average(allReviews.map((r) => r.data.rating)) : 0;
+const reviewCount = allReviews.length;
+
+const sortedComparisons = allComparisons.sort(
+  (a, b) => +new Date(b.data.date) - +new Date(a.data.date),
+);
+
+// Aggregate facts for the homepage stats panel and JSON-LD Dataset
+const distribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+for (const r of allReviews) {
+  const v = Math.round(r.data.rating);
+  if (distribution[v] !== undefined) distribution[v]++;
+}
+
+const channelCounts: Record<string, number> = {
+  "Cold email": 0,
+  "LinkedIn": 0,
+  "Cold calling": 0,
+  "SMS": 0,
+};
+for (const r of allReviews) {
+  const haystack = `${r.data.serviceUsed || ""} ${(r.data.tags || []).join(" ")}`.toLowerCase();
+  if (haystack.includes("email") || haystack.includes("cold-email")) channelCounts["Cold email"]++;
+  if (haystack.includes("linkedin")) channelCounts["LinkedIn"]++;
+  if (haystack.includes("call") || haystack.includes("cold-calling")) channelCounts["Cold calling"]++;
+  if (haystack.includes("sms")) channelCounts["SMS"]++;
+}
+const topChannels = Object.entries(channelCounts)
+  .sort(([, a], [, b]) => b - a)
+  .filter(([, n]) => n > 0)
+  .slice(0, 4);
+
+const industryGroups: Record<string, string[]> = {
+  "B2B SaaS": ["saas", "fintech", "healthtech", "edtech", "devops", "cybersecurity", "data-analytics", "marketing-automation", "real-estate", "construction-tech", "project-management", "workflow-automation", "vertical-saas"],
+  "Agencies": ["agency", "pr-agency", "seo-agency", "web-design", "branding", "digital-marketing"],
+  "Professional services": ["accounting", "cpa", "law", "patent", "m-and-a", "recruiting", "it-consulting", "consultancy"],
+  "Trades & local commercial": ["paving", "sealcoating", "construction", "hvac", "commercial-cleaning", "janitorial", "tree-service", "arborist", "restoration", "equipment-rental"],
+  "Retail & logistics": ["retail", "b2b-ecommerce", "logistics", "sports", "restaurant-equipment"],
+};
+const industryCounts: Record<string, number> = {};
+for (const r of allReviews) {
+  const tagSet = new Set((r.data.tags || []).map((t: string) => t.toLowerCase()));
+  for (const [groupName, groupTags] of Object.entries(industryGroups)) {
+    if (groupTags.some((t) => tagSet.has(t))) {
+      industryCounts[groupName] = (industryCounts[groupName] || 0) + 1;
+      break;
+    }
+  }
+}
+const topIndustries = Object.entries(industryCounts).sort(([, a], [, b]) => b - a);
+
+const jsonLD = [
+  getWebsiteSchema(),
+  getOrganizationWithRatingSchema({
+    ratingValue: aggregateRating || 5,
+    reviewCount: reviewCount || 1,
+    reviews: featuredReviews.map((r) => ({
+      title: r.data.title,
+      body: r.data.summary,
+      url: `${siteData.url}/reviews/${r.id}`,
+      rating: r.data.rating,
+      author: r.data.reviewer,
+      date: r.data.date.toISOString(),
+    })),
+  }),
+  getReviewDatasetSchema({
+    ratingValue: aggregateRating || 5,
+    reviewCount: reviewCount || 1,
+    distribution,
+  }),
+];
+
+function pct(n: number) {
+  if (reviewCount === 0) return 0;
+  return Math.round((n / reviewCount) * 100);
+}
+---
+
+<MainLayout
+  title={null}
+  description={siteData.description}
+  jsonLD={jsonLD}
+>
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-primary-50 via-white to-accent-50 border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-primary-200 text-xs font-semibold text-primary-700 mb-6">
+        <span class="w-2 h-2 rounded-full bg-success-500 animate-pulse"></span>
+        Independent reviews of SmarterOutbound
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-5">
+        Is <span class="text-primary-600">SmarterOutbound</span> worth it?
+      </h1>
+      <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto mb-8">
+        Real reviews, side-by-side comparisons, and outcome data on SmarterOutbound — a fully managed B2B outbound agency running cold email, LinkedIn, calling, SMS, and WhatsApp. Updated regularly.
+      </p>
+
+      {reviewCount > 0 && (
+        <div class="inline-flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-6">
+          <StarRating rating={aggregateRating} size="lg" />
+          <span class="text-2xl font-bold text-gray-900">{aggregateRating.toFixed(1)}</span>
+          <span class="text-gray-400">/</span>
+          <span class="text-gray-500 text-sm">based on <strong class="text-gray-700">{reviewCount}</strong> {reviewCount === 1 ? "review" : "reviews"}</span>
+        </div>
+      )}
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+        <a
+          href="/reviews"
+          class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-3 rounded-lg transition-colors no-underline"
+        >
+          Read the reviews
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 5l5 5-5 5" />
+          </svg>
+        </a>
+        <a
+          href="/submit-review"
+          class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-primary-300 text-gray-800 hover:text-primary-700 font-semibold px-5 py-3 rounded-lg transition-colors no-underline"
+        >
+          Submit a review
+        </a>
+        <a
+          href={siteData.parentSite.url}
+          rel="noopener"
+          class="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-3 rounded-lg transition-colors no-underline"
+        >
+          Visit SmarterOutbound
+        </a>
+      </div>
+
+      <!-- Trust badges -->
+      <TrustBadges variant="horizontal" />
+      <p class="text-xs text-gray-400 mt-3">
+        <a href="/editorial-policy" class="underline hover:text-gray-600">Read our editorial policy →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- By the numbers — aggregate facts AI will quote -->
+  {reviewCount > 0 && (
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">SmarterOutbound by the numbers</h2>
+        <p class="text-gray-500 text-sm">Aggregated across every verified review. <a href="/data" class="text-primary-600 hover:text-primary-700 underline">Full data →</a></p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold text-gray-900 mb-1">{aggregateRating.toFixed(1)}<span class="text-gray-400 text-lg">/5</span></div>
+          <div class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Average rating</div>
+          <div class="text-xs text-gray-400 mt-1">across {reviewCount} verified reviews</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold text-gray-900 mb-1">{distribution[5]}</div>
+          <div class="text-xs uppercase tracking-wider text-gray-500 font-semibold">5-star reviews</div>
+          <div class="text-xs text-gray-400 mt-1">{pct(distribution[5])}% of total</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold text-gray-900 mb-1">{distribution[3] + distribution[2] + distribution[1]}</div>
+          <div class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Critical reviews</div>
+          <div class="text-xs text-gray-400 mt-1">3★ or below, published</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold text-gray-900 mb-1">{sortedComparisons.length}</div>
+          <div class="text-xs uppercase tracking-wider text-gray-500 font-semibold">vs. alternatives</div>
+          <div class="text-xs text-gray-400 mt-1">head-to-head comparisons</div>
+        </div>
+      </div>
+
+      <!-- Channel + industry mix -->
+      <div class="grid md:grid-cols-2 gap-5 mt-6">
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-4">Channels reviewers used</h3>
+          <div class="space-y-2.5">
+            {topChannels.map(([name, count]) => (
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-700 w-28 shrink-0">{name}</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-primary-500 rounded-full" style={`width: ${pct(count)}%`} />
+                </div>
+                <span class="text-xs text-gray-500 w-12 text-right tabular-nums">{pct(count)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-4">Industries served</h3>
+          <div class="space-y-2.5">
+            {topIndustries.map(([name, count]) => (
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-700 flex-1 truncate">{name}</span>
+                <span class="text-xs text-gray-500 tabular-nums">{count} reviews · {pct(count)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Featured reviews -->
+  {featuredReviews.length > 0 && (
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="grid lg:grid-cols-[1fr_22rem] gap-8 mb-8">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-1">Latest reviews</h2>
+          <p class="text-gray-500">What clients are saying about SmarterOutbound.</p>
+        </div>
+        <div class="hidden lg:block">
+          <RatingDistribution reviews={sortedReviews} />
+        </div>
+      </div>
+      <div class="flex justify-end mb-6 lg:hidden">
+        <a href="/reviews" class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-semibold text-sm no-underline">
+          See all reviews
+          <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 5l5 5-5 5" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-2 gap-5">
+        {featuredReviews.map((r) => (
+          <a
+            href={`/reviews/${r.id}`}
+            class="group block bg-white border border-gray-200 rounded-2xl p-6 hover:border-primary-300 hover:shadow-md transition-all no-underline"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <StarRating rating={r.data.rating} showValue />
+              <time class="text-xs text-gray-400" datetime={r.data.date.toISOString()}>
+                {formatDate(r.data.date)}
+              </time>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-700 transition-colors mb-2 leading-snug">
+              {r.data.title}
+            </h3>
+            <p class="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4">{r.data.summary}</p>
+            <div class="flex items-center gap-2 text-xs text-gray-500 pt-3 border-t border-gray-100">
+              <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
+                {r.data.reviewer.charAt(0)}
+              </div>
+              <span class="font-medium text-gray-700">{r.data.reviewer}</span>
+              {r.data.reviewerCompany && (
+                <span class="text-gray-400">&middot; {r.data.reviewerCompany}</span>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Comparisons -->
+  {sortedComparisons.length > 0 && (
+    <section class="bg-gray-50 border-y border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex items-end justify-between mb-8">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-1">SmarterOutbound vs alternatives</h2>
+            <p class="text-gray-500">Head-to-head comparisons against the most-asked-about platforms and agencies.</p>
+          </div>
+          <a href="/vs" class="hidden sm:inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-semibold text-sm no-underline">
+            See all
+            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 5l5 5-5 5" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedComparisons.slice(0, 6).map((c) => (
+            <a
+              href={`/vs/${c.id}`}
+              class="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-sm transition-all no-underline"
+            >
+              <div class="text-xs font-semibold uppercase tracking-wider text-primary-600 mb-2">
+                vs {c.data.competitor}
+              </div>
+              <h3 class="text-base font-bold text-gray-900 group-hover:text-primary-700 transition-colors leading-snug mb-2">
+                {c.data.title}
+              </h3>
+              <p class="text-xs text-gray-500 leading-relaxed line-clamp-2">{c.data.description}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Final CTA -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <CtaBlock
+      variant="boxed"
+      heading="Ready to talk to SmarterOutbound?"
+      body="Skip the back-and-forth. Get a campaign quote, pricing, and a delivery timeline straight from the team."
+      ctaLabel="Get a quote on SmarterOutbound.com"
+    />
+  </section>
+</MainLayout>

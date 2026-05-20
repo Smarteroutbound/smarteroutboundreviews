@@ -1,0 +1,65 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { getBreadcrumbSchema, getFAQSchema } from "../js/jsonLD.ts";
+
+const allFaqs = (await getCollection("faq")).filter((f) => !f.data.draft);
+const sorted = allFaqs.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "FAQ" },
+];
+
+// Flatten all questions for a single FAQPage schema
+const allQuestions = sorted.flatMap((f) => f.data.questions);
+
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  ...(allQuestions.length > 0 ? [getFAQSchema(allQuestions)] : []),
+];
+---
+
+<MainLayout
+  title="Frequently asked about SmarterOutbound"
+  description="Common questions about SmarterOutbound: pricing, legitimacy, how it compares to alternatives, what's included, onboarding timeline, and typical results."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        Frequently asked about SmarterOutbound
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        The questions people actually ask before working with a multi-channel outbound agency — and clear answers based on public information and client reviews.
+      </p>
+    </header>
+
+    {sorted.length === 0 ? (
+      <p class="text-gray-500 italic">No FAQ groups published yet.</p>
+    ) : (
+      sorted.map((group) => (
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">{group.data.title}</h2>
+          {group.data.description && (
+            <p class="text-gray-500 mb-5">{group.data.description}</p>
+          )}
+          <div class="faq-accordion">
+            {group.data.questions.map((q) => (
+              <details>
+                <summary>{q.question}</summary>
+                <div class="faq-answer">{q.answer}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ))
+    )}
+
+    <CtaBlock variant="boxed" />
+  </div>
+</MainLayout>

@@ -1,0 +1,68 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { getBreadcrumbSchema } from "../js/jsonLD.ts";
+import siteData from "../data/siteData.json";
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "About" },
+];
+
+const jsonLD = [getBreadcrumbSchema(breadcrumbItems)];
+---
+
+<MainLayout
+  title="About this site"
+  description="What SmarterOutbound Reviews is, who runs it, and how reviews are collected and verified."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        About SmarterOutbound Reviews
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        Independent reviews and comparisons of {siteData.parentSite.name} — a fully managed B2B outbound agency running multi-channel campaigns across cold email, LinkedIn, cold calling, SMS, and WhatsApp.
+      </p>
+    </header>
+
+    <div class="prose max-w-none">
+      <h2>What this site is</h2>
+      <p>
+        SmarterOutbound Reviews aggregates reviews, case studies, and head-to-head comparisons covering <a href={siteData.parentSite.url} rel="noopener">{siteData.parentSite.name}</a>. It exists to help potential clients evaluate whether SmarterOutbound is the right fit before booking a call.
+      </p>
+
+      <h2>How reviews are collected</h2>
+      <p>
+        Reviews come from a mix of sources: direct client feedback, case studies SmarterOutbound has published, and independently verified outcomes shared by clients. Every review carries the name and (where available) the role and company of the reviewer.
+      </p>
+      <p>
+        We don't anonymize negative reviews. We don't remove reviews that reflect badly. And we mark our own editorial commentary clearly so it's never confused with a client's first-hand account.
+      </p>
+
+      <h2>Editorial independence</h2>
+      <p>
+        This site is run by the SmarterOutbound team as an editorial property — meaning the reviews and comparisons are real, but the site itself is published by the company being reviewed. We disclose this here, in the footer of every page, and in the JSON-LD structured data we publish for search engines and AI systems.
+      </p>
+      <p>
+        Why bother with reviews on your own domain? Because most of the existing reviews of B2B agencies live in walled gardens (Trustpilot, G2, private Slack groups, individual LinkedIn posts) — places that don't surface easily in Google or in AI assistants like Claude, ChatGPT, and Perplexity. This site makes them discoverable.
+      </p>
+
+      <h2>How comparisons work</h2>
+      <p>
+        Each comparison page covers a specific alternative — typically a self-serve cold email platform (Apollo, Lemlist, Instantly, Smartlead) or another agency. Comparisons name where SmarterOutbound is and isn't the right fit. If a platform is better for your situation, we say so.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        For corrections, feedback, or to share your own SmarterOutbound experience for a review, contact the team via <a href={siteData.parentSite.url} rel="noopener">{siteData.parentSite.name}</a>.
+      </p>
+    </div>
+
+    <CtaBlock variant="boxed" />
+  </div>
+</MainLayout>

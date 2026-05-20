@@ -1,0 +1,223 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "./MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import StarRating from "../components/StarRating.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { formatDate, getReadingTime } from "../js/utils.ts";
+import { getReviewSchema, getBreadcrumbSchema } from "../js/jsonLD.ts";
+
+const { frontmatter, headings, rawContent } = Astro.props;
+const {
+  title,
+  summary,
+  rating,
+  reviewer,
+  reviewerTitle,
+  reviewerCompany,
+  serviceUsed,
+  outcome,
+  date,
+  lastUpdated,
+  tags = [],
+  keyTakeaways = [],
+} = frontmatter;
+
+const readingTime = rawContent ? getReadingTime(rawContent()) : null;
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Reviews", url: "/reviews" },
+  { name: title },
+];
+
+const summaryText = summary || `Review of SmarterOutbound by ${reviewer}`;
+
+const reviewSchema = getReviewSchema({
+  title,
+  body: summaryText,
+  url: Astro.url.href,
+  rating,
+  author: reviewer,
+  authorTitle: reviewerTitle,
+  authorCompany: reviewerCompany,
+  date: date?.toISOString?.() || date,
+  lastUpdated: lastUpdated?.toISOString?.() || lastUpdated,
+  serviceUsed,
+  outcome,
+});
+
+const breadcrumbSchema = getBreadcrumbSchema(breadcrumbItems);
+const jsonLD = [reviewSchema, breadcrumbSchema];
+
+const aiSummaryMeta = keyTakeaways.length > 0 ? keyTakeaways.join(" | ") : summaryText;
+
+// Related reviews — score by tag overlap, exclude self, top 3
+const allReviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+const currentTagSet = new Set((tags || []).map((t: string) => t.toLowerCase()));
+const relatedReviews = allReviews
+  .filter((r) => r.data.title !== title)
+  .map((r) => {
+    const otherTags = new Set((r.data.tags || []).map((t: string) => t.toLowerCase()));
+    let overlap = 0;
+    for (const t of currentTagSet) if (otherTags.has(t)) overlap++;
+    return { entry: r, overlap };
+  })
+  .filter((x) => x.overlap > 0)
+  .sort((a, b) => b.overlap - a.overlap || +new Date(b.entry.data.date) - +new Date(a.entry.data.date))
+  .slice(0, 3);
+---
+
+<MainLayout
+  title={title}
+  description={summaryText}
+  jsonLD={jsonLD}
+  ogType="article"
+  publishedTime={date?.toISOString?.()}
+  modifiedTime={lastUpdated?.toISOString?.() || date?.toISOString?.()}
+>
+  <meta slot="head" name="ai-summary" content={aiSummaryMeta} />
+  <meta slot="head" name="ai-page-type" content="review" />
+  <meta slot="head" name="ai-rating" content={String(rating)} />
+
+  <article
+    class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12"
+    data-page-type="review"
+    data-rating={rating}
+  >
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <div class="flex items-center gap-3 mb-3">
+        <StarRating rating={rating} size="lg" showValue />
+        <span class="text-sm text-gray-400">&middot;</span>
+        <span class="text-sm font-medium text-gray-500">Review of SmarterOutbound</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">{title}</h1>
+      {summary && <p class="text-lg text-gray-600 leading-relaxed mb-5">{summary}</p>}
+
+      <!-- Reviewer + meta -->
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm">
+            {reviewer.charAt(0)}
+          </div>
+          <div>
+            <div class="font-semibold text-gray-800">{reviewer}</div>
+            {(reviewerTitle || reviewerCompany) && (
+              <div class="text-xs text-gray-500">
+                {reviewerTitle}{reviewerTitle && reviewerCompany ? ", " : ""}{reviewerCompany}
+              </div>
+            )}
+          </div>
+        </div>
+        {date && (
+          <span>
+            <time datetime={date.toISOString?.() || date}>{formatDate(date)}</time>
+          </span>
+        )}
+        {readingTime && <span>{readingTime}</span>}
+      </div>
+
+      {tags.length > 0 && (
+        <div class="flex gap-2 flex-wrap mt-4">
+          {tags.map((tag: string) => (
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <!-- Outcome / fact strip -->
+    {(serviceUsed || outcome) && (
+      <div class="grid sm:grid-cols-2 gap-4 mb-10">
+        {serviceUsed && (
+          <div class="bg-gray-50 rounded-xl p-5">
+            <div class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-1">Service used</div>
+            <div class="text-base font-semibold text-gray-900">{serviceUsed}</div>
+          </div>
+        )}
+        {outcome && (
+          <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+            <div class="text-xs uppercase tracking-wider font-bold text-success-600 mb-1">Outcome</div>
+            <div class="text-base font-semibold text-gray-900">{outcome}</div>
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- Key takeaways (AI-readable) -->
+    {keyTakeaways.length > 0 && (
+      <div class="ai-summary">
+        <div class="ai-summary__inner">
+          <div class="ai-summary__header">
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a7 7 0 1 0 4.95 11.95l3.55 3.55 1.42-1.42-3.55-3.55A7 7 0 0 0 9 2zm0 2a5 5 0 1 1 0 10A5 5 0 0 1 9 4z" /></svg>
+            Key takeaways
+          </div>
+          <ul class="ai-summary__list">
+            {keyTakeaways.map((point: string) => (
+              <li>
+                <svg class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="m7 13.59-3.79-3.8 1.41-1.41L7 10.76l8.38-8.38 1.41 1.42z" /></svg>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )}
+
+    <!-- Review body -->
+    <div class="prose max-w-none">
+      <slot />
+    </div>
+
+    <!-- Editorial policy reminder -->
+    <aside class="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-5 text-sm text-gray-600">
+      <p class="leading-relaxed">
+        <strong class="text-gray-900">Verified review.</strong> {reviewer} is a verified current or former SmarterOutbound client. Reviews on this site are non-incentivized, are not edited for content, and are not deleted after publication. <a href="/editorial-policy" class="text-primary-600 hover:text-primary-700 underline">Read our editorial policy</a>.
+      </p>
+    </aside>
+
+    <!-- Related reviews -->
+    {relatedReviews.length > 0 && (
+      <section class="mt-12">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Related reviews</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          {relatedReviews.map(({ entry }) => (
+            <a
+              href={`/reviews/${entry.id}`}
+              class="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-sm transition-all no-underline"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <StarRating rating={entry.data.rating} size="sm" showValue />
+                <time class="text-xs text-gray-400" datetime={entry.data.date.toISOString()}>
+                  {formatDate(entry.data.date)}
+                </time>
+              </div>
+              <h3 class="text-sm font-bold text-gray-900 group-hover:text-primary-700 transition-colors leading-snug mb-1.5">
+                {entry.data.title}
+              </h3>
+              <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">{entry.data.summary}</p>
+              {entry.data.reviewer && (
+                <div class="text-xs text-gray-400 mt-2">
+                  {entry.data.reviewer}{entry.data.reviewerCompany && ` · ${entry.data.reviewerCompany}`}
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+          <a href="/reviews" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">All reviews →</a>
+          <a href="/vs" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">vs. alternatives →</a>
+          <a href="/data" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">Aggregate data →</a>
+          <a href="/faq" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">FAQ →</a>
+        </div>
+      </section>
+    )}
+
+    <CtaBlock variant="boxed" />
+  </article>
+</MainLayout>

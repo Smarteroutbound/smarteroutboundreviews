@@ -1,0 +1,121 @@
+---
+import { mainNav } from "../data/navData.ts";
+import siteData from "../data/siteData.json";
+
+const currentPath = Astro.url.pathname;
+
+function isActive(path: string): boolean {
+  if (currentPath === path) return true;
+  if (path !== "/" && currentPath.startsWith(path)) return true;
+  return false;
+}
+---
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 no-underline group shrink-0">
+        <div class="w-9 h-9 bg-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-700 transition-colors">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 10l4 4 10-10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-base font-extrabold text-gray-900 leading-tight">SmarterOutbound<span class="text-primary-600"> Reviews</span></span>
+          <span class="text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-none">Independent &middot; Updated 2026</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1" aria-label="Primary">
+        {mainNav.map((item) => (
+          <a
+            href={item.path}
+            class:list={[
+              "px-3 py-2 rounded-lg text-sm font-medium transition-colors no-underline whitespace-nowrap",
+              isActive(item.path)
+                ? "bg-primary-50 text-primary-700"
+                : "text-gray-600 hover:text-primary-700 hover:bg-gray-50",
+            ]}
+          >
+            {item.name}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Right action: link out to parent site -->
+      <div class="flex items-center gap-2">
+        <a
+          href={siteData.parentSite.url}
+          rel="noopener"
+          class="hidden sm:inline-flex items-center gap-1.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold text-sm px-3.5 py-2 rounded-lg transition-colors no-underline"
+        >
+          Visit SmarterOutbound
+          <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 5l5 5-5 5" />
+          </svg>
+        </a>
+
+        <!-- Mobile menu toggle -->
+        <button
+          class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Toggle navigation"
+          aria-expanded="false"
+          id="nav-toggle"
+        >
+          <svg id="nav-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <svg id="nav-icon-close" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <nav id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white px-4 pb-4 shadow-lg">
+    <div class="py-2">
+      {mainNav.map((item) => (
+        <a
+          href={item.path}
+          class:list={[
+            "block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors no-underline",
+            isActive(item.path)
+              ? "bg-primary-50 text-primary-700"
+              : "text-gray-600 hover:bg-gray-50",
+          ]}
+        >
+          {item.name}
+        </a>
+      ))}
+      <a
+        href={siteData.parentSite.url}
+        rel="noopener"
+        class="mt-2 flex items-center justify-center gap-1.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold text-sm px-4 py-2.5 rounded-lg no-underline"
+      >
+        Visit SmarterOutbound
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById("nav-toggle");
+  const menu = document.getElementById("mobile-menu");
+  const iconOpen = document.getElementById("nav-icon-open");
+  const iconClose = document.getElementById("nav-icon-close");
+
+  if (toggle && menu && iconOpen && iconClose) {
+    toggle.addEventListener("click", () => {
+      const isHidden = menu.classList.toggle("hidden");
+      toggle.setAttribute("aria-expanded", String(!isHidden));
+      iconOpen.classList.toggle("hidden", !isHidden);
+      iconClose.classList.toggle("hidden", isHidden);
+    });
+  }
+</script>

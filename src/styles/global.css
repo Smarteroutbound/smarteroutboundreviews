@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ===== CUSTOM THEME (indigo primary + amber accent for B2B sales) ===== */
+@theme {
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+  --color-accent-700: #c2410c;
+
+  --color-success-50: #f0fdf4;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+/* ===== BASE ===== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ===== PROSE (review body content) ===== */
+.prose {
+  @apply max-w-none text-gray-700 leading-relaxed;
+}
+.prose h2 {
+  @apply text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b-2 border-primary-100;
+}
+.prose h3 {
+  @apply text-xl font-semibold text-gray-900 mt-8 mb-3;
+}
+.prose h4 {
+  @apply text-lg font-semibold text-gray-800 mt-6 mb-2;
+}
+.prose p {
+  @apply mb-4 text-base leading-7;
+}
+.prose ul,
+.prose ol {
+  @apply pl-6 mb-4 space-y-1;
+}
+.prose ul { list-style-type: disc; }
+.prose ol { list-style-type: decimal; }
+.prose li { @apply text-base leading-7; }
+.prose strong { @apply font-semibold text-gray-900; }
+.prose blockquote {
+  @apply border-l-4 border-primary-500 pl-4 py-2 bg-primary-50 rounded-r-lg mb-4 italic text-gray-600;
+}
+.prose table {
+  @apply w-full border-collapse mb-6 text-sm;
+}
+.prose th {
+  @apply bg-gray-50 px-4 py-3 text-left font-semibold text-gray-900 border border-gray-200;
+}
+.prose td {
+  @apply px-4 py-3 border border-gray-200 text-gray-700;
+}
+.prose code {
+  @apply text-sm bg-gray-100 px-1.5 py-0.5 rounded font-mono;
+}
+.prose a {
+  @apply text-primary-600 underline decoration-primary-200 hover:decoration-primary-500 transition-colors;
+}
+.prose hr { @apply my-10 border-gray-200; }
+
+/* ===== STARS ===== */
+.star-rating {
+  @apply inline-flex items-center gap-0.5 text-amber-400;
+}
+.star-rating svg {
+  @apply w-4 h-4;
+}
+
+/* ===== FAQ ACCORDION ===== */
+.faq-accordion details {
+  @apply border border-gray-200 rounded-lg mb-3 overflow-hidden bg-white;
+}
+.faq-accordion summary {
+  @apply px-5 py-4 font-medium text-gray-900 cursor-pointer select-none flex items-center justify-between;
+  list-style: none;
+}
+.faq-accordion summary::-webkit-details-marker { display: none; }
+.faq-accordion summary::after {
+  content: "+";
+  @apply text-xl text-gray-400 ml-4 shrink-0 transition-transform duration-200;
+}
+.faq-accordion details[open] summary::after {
+  content: "\2212";
+  @apply text-primary-500;
+}
+.faq-accordion details[open] summary {
+  @apply border-b border-gray-100 bg-gray-50;
+}
+.faq-accordion .faq-answer {
+  @apply px-5 py-4 text-gray-700 leading-relaxed;
+}
+
+/* ===== AI SUMMARY (semantic block for crawlers + readers) ===== */
+.ai-summary {
+  @apply mb-8;
+}
+.ai-summary__inner {
+  @apply bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200 rounded-xl p-6;
+}
+.ai-summary__header {
+  @apply flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-primary-800 mb-3;
+}
+.ai-summary__list {
+  @apply space-y-2 list-none pl-0;
+}
+.ai-summary__list li {
+  @apply flex items-start gap-2.5 text-sm text-gray-700 leading-relaxed;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up { animation: none; }
+}

@@ -1,0 +1,43 @@
+# SmarterOutbound Reviews — independent reviews and comparisons
+# Allow all search engines and AI crawlers
+
+User-agent: *
+Allow: /
+Disallow: /search/
+
+# Explicitly allow AI search crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://smarteroutboundreviews.com/sitemap-index.xml
+
+# LLM-readable site overview (short index + full content dump)
+Llms-txt: https://smarteroutboundreviews.com/llms.txt
+Llms-full-txt: https://smarteroutboundreviews.com/llms-full.txt

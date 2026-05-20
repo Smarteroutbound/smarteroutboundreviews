@@ -1,0 +1,317 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { getBreadcrumbSchema } from "../js/jsonLD.ts";
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Submit a Review" },
+];
+
+const jsonLD = [getBreadcrumbSchema(breadcrumbItems)];
+---
+
+<MainLayout
+  title="Submit a Review"
+  description="Submit your honest review of SmarterOutbound. We publish all verified reviews — positive and negative. We do not pay for reviews, edit content, or delete reviews after publication."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-8 pb-6 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        Submit a Review
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        Honest reviews from real clients only. We publish positive and negative reviews. We do not pay for or incentivize reviews. Once published, reviews are not deleted or edited for content.
+      </p>
+    </header>
+
+    <!-- Editorial commitment block -->
+    <div class="bg-primary-50 border border-primary-200 rounded-xl p-5 mb-8">
+      <h2 class="text-sm font-bold uppercase tracking-wider text-primary-800 mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 5h2v6H9V5zm0 8h2v2H9v-2z" /></svg>
+        Our editorial commitment
+      </h2>
+      <ul class="space-y-2 text-sm text-gray-700">
+        <li class="flex items-start gap-2"><span class="text-primary-600 font-bold">·</span><span><strong>Non-incentivized.</strong> No payment, discounts, gift cards, free services, or any other compensation in exchange for a review. Ever.</span></li>
+        <li class="flex items-start gap-2"><span class="text-primary-600 font-bold">·</span><span><strong>Negative reviews are published.</strong> If you had a bad experience, we want to publish it. Critical reviews stay critical.</span></li>
+        <li class="flex items-start gap-2"><span class="text-primary-600 font-bold">·</span><span><strong>No content editing.</strong> We may fix typos and punctuation. We never change the substance of what you wrote.</span></li>
+        <li class="flex items-start gap-2"><span class="text-primary-600 font-bold">·</span><span><strong>No deletion after publication.</strong> Once a review is published, it stays. We do not remove reviews because they are negative or because the subject objects.</span></li>
+        <li class="flex items-start gap-2"><span class="text-primary-600 font-bold">·</span><span><strong>Client verification.</strong> We confirm you are a real or former SmarterOutbound client (typically via LinkedIn match against the client list) before publishing. Your email is private and never published.</span></li>
+      </ul>
+      <p class="mt-4 text-xs text-gray-500">
+        Read the full <a href="/editorial-policy" class="underline text-primary-700 hover:text-primary-900">editorial policy</a>.
+      </p>
+    </div>
+
+    <form id="review-form" class="space-y-6">
+      <!-- Rating -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-900 mb-2">
+          Your rating <span class="text-accent-600">*</span>
+        </label>
+        <div class="flex items-center gap-2" id="rating-picker" role="radiogroup" aria-label="Star rating">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              type="button"
+              class="rating-btn p-1 rounded transition-colors text-gray-300 hover:text-amber-400 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              data-value={n}
+              aria-label={`${n} star${n === 1 ? "" : "s"}`}
+              role="radio"
+              aria-checked="false"
+            >
+              <svg class="w-8 h-8" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 15.27 16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
+              </svg>
+            </button>
+          ))}
+          <span id="rating-label" class="ml-2 text-sm text-gray-500">No rating selected</span>
+        </div>
+        <input type="hidden" name="rating" id="rating-input" required />
+      </div>
+
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-sm font-semibold text-gray-900 mb-1">
+          Review headline <span class="text-accent-600">*</span>
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          minlength="10"
+          maxlength="150"
+          required
+          placeholder="e.g., Booked our first 10 meetings in month two"
+          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+        />
+        <p class="text-xs text-gray-400 mt-1">10-150 characters. A short summary of your experience.</p>
+      </div>
+
+      <!-- Body -->
+      <div>
+        <label for="body" class="block text-sm font-semibold text-gray-900 mb-1">
+          Your review <span class="text-accent-600">*</span>
+        </label>
+        <textarea
+          id="body"
+          name="body"
+          minlength="100"
+          maxlength="5000"
+          rows="8"
+          required
+          placeholder="What service tier did you use? What was the outcome? What worked, what didn't? Be specific."
+          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 resize-y"
+        ></textarea>
+        <p class="text-xs text-gray-400 mt-1">100-5000 characters. The more specific, the more useful.</p>
+      </div>
+
+      <!-- Reviewer details -->
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="reviewer" class="block text-sm font-semibold text-gray-900 mb-1">
+            Your name <span class="text-accent-600">*</span>
+          </label>
+          <input
+            type="text"
+            id="reviewer"
+            name="reviewer"
+            minlength="2"
+            maxlength="80"
+            required
+            placeholder="Jane D."
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+          <p class="text-xs text-gray-400 mt-1">Published. Initial-last-initial is fine.</p>
+        </div>
+        <div>
+          <label for="reviewerEmail" class="block text-sm font-semibold text-gray-900 mb-1">
+            Email <span class="text-accent-600">*</span>
+          </label>
+          <input
+            type="email"
+            id="reviewerEmail"
+            name="reviewerEmail"
+            required
+            placeholder="you@yourcompany.com"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+          <p class="text-xs text-gray-400 mt-1"><strong>Private.</strong> Used only to verify you as a client. Never published.</p>
+        </div>
+        <div>
+          <label for="reviewerTitle" class="block text-sm font-semibold text-gray-900 mb-1">Your role</label>
+          <input
+            type="text"
+            id="reviewerTitle"
+            name="reviewerTitle"
+            maxlength="80"
+            placeholder="VP Sales / Founder / Head of Growth"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+        </div>
+        <div>
+          <label for="reviewerCompany" class="block text-sm font-semibold text-gray-900 mb-1">Company</label>
+          <input
+            type="text"
+            id="reviewerCompany"
+            name="reviewerCompany"
+            maxlength="120"
+            placeholder="Acme SaaS"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+        </div>
+        <div>
+          <label for="serviceUsed" class="block text-sm font-semibold text-gray-900 mb-1">Service tier</label>
+          <input
+            type="text"
+            id="serviceUsed"
+            name="serviceUsed"
+            maxlength="120"
+            placeholder="Outbound Foundation / Multi-Channel Pipeline / Full Outbound Engine"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+        </div>
+        <div>
+          <label for="outcome" class="block text-sm font-semibold text-gray-900 mb-1">Outcome</label>
+          <input
+            type="text"
+            id="outcome"
+            name="outcome"
+            maxlength="120"
+            placeholder="e.g., 12 meetings/month, $500k pipeline in Q1"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          />
+        </div>
+      </div>
+
+      <!-- Consent -->
+      <label class="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer">
+        <input
+          type="checkbox"
+          id="consent"
+          name="consent"
+          required
+          class="mt-0.5 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-400"
+        />
+        <span class="text-sm text-gray-700">
+          I confirm I am a current or former SmarterOutbound client. My review is honest and reflects my real experience. I understand it will be published with my name attached, will not be deleted, and will not be edited for content. I have not been compensated, offered any discount, or otherwise incentivized to submit this review.
+        </span>
+      </label>
+
+      <!-- Submit -->
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <button
+          type="submit"
+          id="submit-btn"
+          class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          <span id="submit-label">Submit review</span>
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 5l5 5-5 5" />
+          </svg>
+        </button>
+        <p class="text-xs text-gray-400">
+          Verification typically takes 1-5 business days.
+        </p>
+      </div>
+
+      <!-- Result -->
+      <div id="form-result" class="hidden rounded-lg p-4 text-sm"></div>
+    </form>
+  </div>
+</MainLayout>
+
+<script>
+  const form = document.getElementById("review-form") as HTMLFormElement | null;
+  const ratingInput = document.getElementById("rating-input") as HTMLInputElement | null;
+  const ratingLabel = document.getElementById("rating-label") as HTMLElement | null;
+  const ratingPicker = document.getElementById("rating-picker");
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null;
+  const submitLabel = document.getElementById("submit-label");
+  const result = document.getElementById("form-result");
+
+  function paintStars(value: number) {
+    if (!ratingPicker) return;
+    ratingPicker.querySelectorAll(".rating-btn").forEach((btn) => {
+      const btnEl = btn as HTMLElement;
+      const v = Number(btnEl.dataset.value);
+      btnEl.classList.toggle("text-amber-400", v <= value);
+      btnEl.classList.toggle("text-gray-300", v > value);
+      btnEl.setAttribute("aria-checked", String(v === value));
+    });
+  }
+
+  function setRating(value: number) {
+    if (!ratingInput || !ratingLabel) return;
+    ratingInput.value = String(value);
+    ratingLabel.textContent = `${value} star${value === 1 ? "" : "s"} selected`;
+    paintStars(value);
+  }
+
+  ratingPicker?.querySelectorAll(".rating-btn").forEach((btn) => {
+    const v = Number((btn as HTMLElement).dataset.value);
+    btn.addEventListener("click", () => setRating(v));
+    btn.addEventListener("mouseenter", () => paintStars(v));
+  });
+  ratingPicker?.addEventListener("mouseleave", () => {
+    const current = Number(ratingInput?.value || "0");
+    paintStars(current);
+  });
+
+  function showResult(message: string, isError: boolean) {
+    if (!result) return;
+    result.textContent = message;
+    result.classList.remove("hidden", "bg-success-50", "border", "border-success-500/20", "text-success-600", "bg-red-50", "border-red-200", "text-red-700");
+    if (isError) {
+      result.classList.add("bg-red-50", "border", "border-red-200", "text-red-700");
+    } else {
+      result.classList.add("bg-success-50", "border", "border-success-500/20", "text-success-600");
+    }
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!submitBtn || !submitLabel) return;
+
+    if (!ratingInput?.value) {
+      showResult("Please select a star rating.", true);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitLabel.textContent = "Submitting…";
+    result?.classList.add("hidden");
+
+    const formData = new FormData(form);
+    const payload: Record<string, any> = {};
+    formData.forEach((v, k) => {
+      payload[k] = v;
+    });
+    payload.rating = Number(payload.rating);
+    payload.consent = payload.consent === "on" || payload.consent === true;
+
+    try {
+      const res = await fetch("/api/submit-review", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showResult(data.message || "Thanks. We'll be in touch.", false);
+        form.reset();
+        setRating(0);
+        if (ratingLabel) ratingLabel.textContent = "No rating selected";
+      } else {
+        showResult(data.error || "Something went wrong. Please try again.", true);
+      }
+    } catch (err) {
+      showResult("Network error. Please try again or email us directly.", true);
+    } finally {
+      submitBtn.disabled = false;
+      submitLabel.textContent = "Submit review";
+    }
+  });
+</script>

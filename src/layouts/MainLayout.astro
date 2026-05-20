@@ -1,0 +1,47 @@
+---
+import Seo from "../components/Seo.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+import "../styles/global.css";
+
+const {
+  title,
+  description,
+  image,
+  robots,
+  canonicalUrl,
+  jsonLD,
+  ogType,
+  publishedTime,
+  modifiedTime,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <Seo
+      title={title}
+      description={description}
+      image={image}
+      robots={robots}
+      canonicalUrl={canonicalUrl}
+      jsonLD={jsonLD}
+      ogType={ogType}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+    />
+    <slot name="head" />
+  </head>
+  <body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <Nav />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    <Analytics />
+    <SpeedInsights />
+  </body>
+</html>
