@@ -4,7 +4,7 @@ summary: "Cold email to platform engineers is hard. They detect generic outreach
 rating: 5
 reviewer: "Aria N."
 reviewerTitle: "Co-founder"
-reviewerCompany: "Drift Platform (devops SaaS)"
+reviewerCompany: "Streamlock (devops SaaS)"
 serviceUsed: "Outbound Foundation — cold email"
 outcome: "Reply rate of 4.1% on platform engineer outreach"
 date: 2026-04-05

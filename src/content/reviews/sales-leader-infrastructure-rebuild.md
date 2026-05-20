@@ -4,7 +4,7 @@ summary: "I have been on both sides of B2B outreach for ten years. SmarterOutbou
 rating: 5
 reviewer: "Marcus K."
 reviewerTitle: "VP of Sales"
-reviewerCompany: "Stackline AI (Seed-stage devtools)"
+reviewerCompany: "Bytekiln (Seed-stage devtools)"
 serviceUsed: "Full-service outbound + technical positioning workshop"
 outcome: "Pipeline coverage moved from 2x to 4.5x quota in one quarter"
 date: 2026-01-29
@@ -21,7 +21,7 @@ I have been head of sales at three startups now and have hired six different out
 
 ## Context
 
-Stackline AI sells developer tools to engineering leaders at mid-market companies. This is a notoriously hard segment to outbound into. The buyers hate cold email. The job titles vary wildly (VP Eng, Director of Platform, Head of Developer Experience, sometimes the CTO directly). Most outbound vendors I have worked with would have just spammed every VP Eng on Apollo and called it a day.
+Bytekiln sells developer tools to engineering leaders at mid-market companies. This is a notoriously hard segment to outbound into. The buyers hate cold email. The job titles vary wildly (VP Eng, Director of Platform, Head of Developer Experience, sometimes the CTO directly). Most outbound vendors I have worked with would have just spammed every VP Eng on Apollo and called it a day.
 
 ## What they did differently
 
