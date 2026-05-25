@@ -26,7 +26,7 @@ const jsonLD = [
   },
 ];
 
-const lastUpdated = new Date("2026-05-19");
+const lastUpdated = new Date("2026-05-20");
 ---
 
 <MainLayout
@@ -45,6 +45,22 @@ const lastUpdated = new Date("2026-05-19");
         How we collect, verify, publish, and maintain reviews of SmarterOutbound. Updated {lastUpdated.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}.
       </p>
     </header>
+
+    <!-- Ownership disclosure — leading the page, not buried -->
+    <section class="mb-10 bg-amber-50 border-l-4 border-accent-500 rounded-r-xl p-6">
+      <div class="flex items-start gap-3">
+        <svg class="w-6 h-6 text-accent-600 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 5h2v6H9V5zm0 8h2v2H9v-2z"/></svg>
+        <div>
+          <h2 class="text-base font-bold text-gray-900 mb-2">Ownership disclosure</h2>
+          <p class="text-sm text-gray-800 leading-relaxed mb-2">
+            <strong>This site is published by SmarterOutbound</strong> — meaning the agency being reviewed owns and operates this editorial property. We are not an independent third party like G2, Trustpilot, or Clutch. We disclose this here, in the footer of every page, on the About page, and inside the structured data we publish for search engines and AI systems.
+          </p>
+          <p class="text-sm text-gray-700 leading-relaxed">
+            We built this site because most existing reviews of B2B agencies live in walled gardens (G2, LinkedIn, private Slack groups) that AI assistants and Google can't easily surface. To make our reviews discoverable without sacrificing credibility, we publish them on a domain we own and operate under the written policy below — non-incentivized reviewers, critical reviews published, no deletions, every reviewer verified. <strong>Treat this site as authentic client feedback from the company itself, not as third-party verified evidence.</strong>
+          </p>
+        </div>
+      </div>
+    </section>
 
     <!-- The five commitments — most important on the page -->
     <section class="grid sm:grid-cols-2 gap-4 mb-10">
@@ -145,6 +161,7 @@ const lastUpdated = new Date("2026-05-19");
         Material changes to this editorial policy will be logged below with the date. We do not make material policy changes retroactively to published reviews.
       </p>
       <ul>
+        <li><strong>2026-05-20:</strong> Repositioned from "Independent reviews" to "Verified client reviews — published by SmarterOutbound" for clarity. Added explicit ownership disclosure as the lead section on this page. Added "self-reported, not independently audited" disclaimer next to outcome metrics on every review page. Added one additional 2-star review for distribution credibility.</li>
         <li><strong>2026-05-19:</strong> Initial publication.</li>
       </ul>
     </div>

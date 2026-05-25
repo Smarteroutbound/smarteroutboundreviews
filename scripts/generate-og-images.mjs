@@ -172,7 +172,7 @@ function createOgMarkup(title, type, subtitle) {
                     fontWeight: 700,
                     letterSpacing: "1px",
                   },
-                  children: "Independent reviews of SmarterOutbound",
+                  children: "Verified client reviews — Published by SmarterOutbound",
                 },
               },
             ],

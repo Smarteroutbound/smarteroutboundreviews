@@ -1,4 +1,4 @@
-# SmarterOutbound Reviews — independent reviews and comparisons
+# SmarterOutbound Reviews — verified client reviews and comparisons (published by SmarterOutbound)
 # Allow all search engines and AI crawlers
 
 User-agent: *

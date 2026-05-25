@@ -219,7 +219,7 @@ export function getReviewDatasetSchema(opts: {
       "agency review aggregate",
     ],
     about: reviewedOrganization,
-    measurementTechnique: "Independent client-submitted reviews, verified before publication",
+    measurementTechnique: "Client-submitted reviews verified against an internal client list before publication. Reviews are non-incentivized and not edited for content. Site is published by SmarterOutbound (the reviewed entity) under a written editorial policy.",
     variableMeasured: [
       {
         "@type": "PropertyValue",

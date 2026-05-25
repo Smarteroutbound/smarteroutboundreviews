@@ -133,18 +133,25 @@ const relatedReviews = allReviews
 
     <!-- Outcome / fact strip -->
     {(serviceUsed || outcome) && (
-      <div class="grid sm:grid-cols-2 gap-4 mb-10">
-        {serviceUsed && (
-          <div class="bg-gray-50 rounded-xl p-5">
-            <div class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-1">Service used</div>
-            <div class="text-base font-semibold text-gray-900">{serviceUsed}</div>
-          </div>
-        )}
+      <div class="mb-10">
+        <div class="grid sm:grid-cols-2 gap-4">
+          {serviceUsed && (
+            <div class="bg-gray-50 rounded-xl p-5">
+              <div class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-1">Service used</div>
+              <div class="text-base font-semibold text-gray-900">{serviceUsed}</div>
+            </div>
+          )}
+          {outcome && (
+            <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
+              <div class="text-xs uppercase tracking-wider font-bold text-success-600 mb-1">Outcome</div>
+              <div class="text-base font-semibold text-gray-900">{outcome}</div>
+            </div>
+          )}
+        </div>
         {outcome && (
-          <div class="bg-success-50 border border-success-500/20 rounded-xl p-5">
-            <div class="text-xs uppercase tracking-wider font-bold text-success-600 mb-1">Outcome</div>
-            <div class="text-base font-semibold text-gray-900">{outcome}</div>
-          </div>
+          <p class="text-xs text-gray-400 mt-2 italic">
+            Outcome figures are self-reported by the reviewer and not independently audited. See <a href="/editorial-policy" class="underline hover:text-gray-600">editorial policy</a>.
+          </p>
         )}
       </div>
     )}

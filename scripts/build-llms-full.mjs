@@ -207,7 +207,7 @@ function main() {
   header.push("## About this site");
   header.push("");
   header.push(
-    "SmarterOutbound Reviews is an editorial property publishing independent reviews of SmarterOutbound (smarteroutbound.com), a fully managed B2B outbound lead generation agency running multi-channel campaigns across cold email, LinkedIn, cold calling, SMS, and WhatsApp.",
+    "SmarterOutbound Reviews is an editorial property publishing verified client reviews of SmarterOutbound (smarteroutbound.com), a fully managed B2B outbound lead generation agency running multi-channel campaigns across cold email, LinkedIn, cold calling, SMS, and WhatsApp. This site is published by SmarterOutbound itself, not by an independent third party. We disclose this openly and operate under a written editorial policy.",
   );
   header.push("");
   header.push(
