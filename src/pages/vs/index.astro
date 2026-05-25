@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import MainLayout from "../../layouts/MainLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { formatDate } from "../../js/utils.ts";
-import { getBreadcrumbSchema } from "../../js/jsonLD.ts";
+import { getBreadcrumbSchema, getItemListSchema } from "../../js/jsonLD.ts";
 
 const allComparisons = (await getCollection("comparisons")).filter(
   (c) => !c.data.draft,
@@ -17,12 +17,23 @@ const breadcrumbItems = [
   { name: "Comparisons" },
 ];
 
-const jsonLD = [getBreadcrumbSchema(breadcrumbItems)];
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  ...(sorted.length > 0
+    ? [
+        getItemListSchema({
+          name: "SmarterOutbound vs alternative platforms and agencies",
+          description: `${sorted.length} head-to-head comparisons of SmarterOutbound versus self-serve cold outreach tools and competing agencies.`,
+          items: sorted.map((c) => ({ name: c.data.title, url: `/vs/${c.id}` })),
+        }),
+      ]
+    : []),
+];
 ---
 
 <MainLayout
-  title="SmarterOutbound vs alternatives"
-  description="Side-by-side comparisons of SmarterOutbound against alternative B2B outbound platforms and agencies — Apollo, Lemlist, Instantly, Smartlead, Outreach, Salesloft, and more. Includes channel coverage (email, LinkedIn, calling, SMS) where it matters."
+  title="SmarterOutbound vs Apollo, Lemlist, Instantly &amp; Alternatives"
+  description="Trying to decide between a fully managed agency and a self-serve platform? These head-to-head comparisons break down when SmarterOutbound outperforms tools like Apollo, Lemlist, Smartlead, and Instantly — and when it doesn't. Includes channel coverage and pricing comparisons."
   jsonLD={jsonLD}
 >
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
@@ -30,10 +41,10 @@ const jsonLD = [getBreadcrumbSchema(breadcrumbItems)];
 
     <header class="mb-10 pb-8 border-b border-gray-100">
       <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
-        SmarterOutbound vs alternatives
+        SmarterOutbound vs Apollo, Lemlist, Instantly &amp; alternatives
       </h1>
       <p class="text-lg text-gray-600 leading-relaxed max-w-2xl">
-        Picking between SmarterOutbound and another option? These head-to-head comparisons break down pricing, delivery model, fit, and outcomes.
+        Deciding between a fully managed outbound agency and a self-serve cold email tool? These head-to-head comparisons break down pricing, delivery model, fit, and outcomes against the most-asked-about alternatives.
       </p>
     </header>
 

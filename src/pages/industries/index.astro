@@ -1,0 +1,85 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "../../layouts/MainLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CtaBlock from "../../components/CtaBlock.astro";
+import { getBreadcrumbSchema, getItemListSchema } from "../../js/jsonLD.ts";
+import { industries } from "../../data/industries.ts";
+
+const allReviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+
+// Compute review count per industry
+function countReviewsForIndustry(tagFilters: string[]): number {
+  const filterSet = new Set(tagFilters.map((t) => t.toLowerCase()));
+  return allReviews.filter((r) => {
+    const reviewTags = new Set((r.data.tags || []).map((t: string) => t.toLowerCase()));
+    return [...filterSet].some((t) => reviewTags.has(t));
+  }).length;
+}
+
+const sorted = [...industries]
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((i) => ({ ...i, reviewCount: countReviewsForIndustry(i.tagFilters) }));
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Industries" },
+];
+
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  getItemListSchema({
+    name: "SmarterOutbound client reviews by industry",
+    description:
+      "SmarterOutbound serves clients across B2B SaaS, agencies, professional services, paving and trades, HVAC, commercial cleaning, construction, and other commercial service categories. Each hub aggregates the verified reviews from that industry.",
+    items: sorted.map((i) => ({
+      name: `${i.name} — ${i.reviewCount} reviews`,
+      url: `/industries/${i.slug}`,
+    })),
+  }),
+];
+---
+
+<MainLayout
+  title="SmarterOutbound Reviews by Industry — SaaS, Agencies, Paving, HVAC, Construction"
+  description="Browse SmarterOutbound client reviews by industry: B2B SaaS, marketing agencies, professional services, paving contractors, HVAC, commercial cleaning, construction firms, and more. Each industry hub shows the channel mix (cold email, LinkedIn, SMS, calling) most effective for that buyer type."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        SmarterOutbound reviews by industry
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed max-w-2xl">
+        SmarterOutbound's clients span B2B SaaS, agencies, professional services, paving and trades, HVAC, commercial cleaning, construction, and other commercial services. Each industry uses a different channel mix — these hubs surface the reviews and outcomes that match your buyer profile.
+      </p>
+    </header>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      {sorted.map((i) => (
+        <a
+          href={`/industries/${i.slug}`}
+          class="group block bg-white border border-gray-200 rounded-2xl p-6 hover:border-primary-300 hover:shadow-md transition-all no-underline"
+        >
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <h2 class="text-lg font-bold text-gray-900 group-hover:text-primary-700 transition-colors leading-snug">
+              {i.name}
+            </h2>
+            <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700">
+              {i.reviewCount} reviews
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-3">{i.intro}</p>
+          <div class="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+            Channel focus
+          </div>
+          <div class="text-xs text-gray-600 leading-relaxed mt-0.5">{i.channelFocus}</div>
+        </a>
+      ))}
+    </div>
+
+    <CtaBlock variant="boxed" />
+  </div>
+</MainLayout>

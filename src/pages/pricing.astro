@@ -1,0 +1,260 @@
+---
+import { getCollection } from "astro:content";
+import MainLayout from "../layouts/MainLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import StarRating from "../components/StarRating.astro";
+import CtaBlock from "../components/CtaBlock.astro";
+import { formatDate } from "../js/utils.ts";
+import { getBreadcrumbSchema, getFAQSchema } from "../js/jsonLD.ts";
+import siteData from "../data/siteData.json";
+
+const allReviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+
+type Tier = {
+  slug: string;
+  name: string;
+  price: string;
+  blurb: string;
+  includes: string[];
+  matcher: (svc: string) => boolean;
+  bestFor: string;
+  notFor: string;
+  badge: string;
+};
+
+const tiers: Tier[] = [
+  {
+    slug: "foundation",
+    name: "Outbound Foundation",
+    price: "$2,500 / month",
+    blurb:
+      "Cold email infrastructure, copywriting, and human reply management. The entry tier — sending domain setup, deliverability monitoring, and qualified meeting handoff. Single-channel (email only).",
+    includes: [
+      "Dedicated sending domains and inbox warmup",
+      "ICP definition and list sourcing",
+      "Cold email copywriting and A/B testing",
+      "Human reply triage (no auto-responders)",
+      "Meeting handoff to your calendar",
+      "Weekly reporting on opens, replies, booked meetings",
+    ],
+    matcher: (svc) => svc.toLowerCase().includes("foundation"),
+    bestFor:
+      "B2B sellers with clearly defined ICPs, a working offer, and budget for ~3-6 month commitment. Good for: SaaS founders, professional services firms, agencies, and local trade contractors testing the channel before scaling.",
+    notFor:
+      "Companies pre-product-market-fit, sub-$2,000/month outbound budget, or buyer profiles that require LinkedIn or calling to be reached at all (e.g., CFOs, platform engineers, senior security leaders).",
+    badge: "ENTRY",
+  },
+  {
+    slug: "multi-channel",
+    name: "Multi-Channel Pipeline",
+    price: "$4,500 / month",
+    blurb:
+      "Everything in Foundation plus LinkedIn outreach, SMS, list enrichment, and meeting qualification. Two-to-three channels orchestrated against the same accounts.",
+    includes: [
+      "Everything in Foundation, plus:",
+      "LinkedIn connection requests + DM sequences",
+      "SMS outreach to verified commercial contacts (where compliant)",
+      "Manual list enrichment beyond standard data sources",
+      "Meeting qualification before calendar handoff",
+      "Per-channel performance reporting",
+    ],
+    matcher: (svc) => svc.toLowerCase().includes("multi-channel") || svc.toLowerCase().includes("multi channel"),
+    bestFor:
+      "B2B sellers whose buyer ignores cold email by default (CFOs, controllers, technical leaders, property managers) or who compete in saturated categories where multi-touch is required to break through.",
+    notFor:
+      "Single-buyer-persona sellers where email alone produces enough pipeline — paying for channels you don't need.",
+    badge: "MOST COMMON",
+  },
+  {
+    slug: "full-engine",
+    name: "Full Outbound Engine",
+    price: "Custom",
+    blurb:
+      "All five channels: email, LinkedIn, SMS, cold calling, and WhatsApp. Includes SDR-style support and advanced reporting. The full replacement for an internal sales development team.",
+    includes: [
+      "Everything in Multi-Channel Pipeline, plus:",
+      "Dedicated cold calling team",
+      "WhatsApp outreach (where appropriate)",
+      "SDR-style account ownership and follow-up cadences",
+      "Advanced pipeline reporting integrated with your CRM",
+      "Custom playbooks per buyer persona",
+    ],
+    matcher: (svc) =>
+      svc.toLowerCase().includes("full") ||
+      svc.toLowerCase().includes("engine") ||
+      svc.toLowerCase().includes("five-channel") ||
+      svc.toLowerCase().includes("five channel"),
+    bestFor:
+      "Series B+ B2B SaaS scaling outbound from internal SDR plateaus, professional services targeting senior executives, or multi-trade commercial firms that need a steerable, multi-channel pipeline.",
+    notFor:
+      "Companies at sub-$50k MRR or pre-Series A — the cost commitment rarely makes sense at that stage.",
+    badge: "FULL ENGINE",
+  },
+];
+
+// Count reviews per tier and pull featured examples
+function reviewsForTier(tier: Tier) {
+  const matches = allReviews
+    .filter((r) => r.data.serviceUsed && tier.matcher(String(r.data.serviceUsed)))
+    .sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date));
+  return matches;
+}
+
+const tierData = tiers.map((t) => ({ ...t, reviews: reviewsForTier(t) }));
+
+// FAQs about pricing — get into FAQ rich result eligibility
+const pricingFaqs = [
+  {
+    question: "How much does SmarterOutbound cost?",
+    answer:
+      "Three published tiers: Outbound Foundation at $2,500/month (cold email only), Multi-Channel Pipeline at $4,500/month (email + LinkedIn + SMS), and Full Outbound Engine at custom pricing (all five channels including cold calling and WhatsApp, with SDR-style support). Custom pricing typically lands in the $8k-$15k/month range depending on volume and channel mix.",
+  },
+  {
+    question: "Is there a setup fee?",
+    answer:
+      "Per public information, no separate setup fee is published. The first 1-3 weeks of any engagement are infrastructure setup (Build phase) — domains, warmup, ICP definition, copy drafting — included in the monthly fee. Campaigns start sending in the Launch phase (weeks 2-3).",
+  },
+  {
+    question: "What's the minimum commitment?",
+    answer:
+      "Not publicly disclosed. Most outbound agency engagements run 3-6 month minimums because the channel needs that much time to ramp and iterate. Ask during discovery.",
+  },
+  {
+    question: "Can I start on Foundation and upgrade to Multi-Channel later?",
+    answer:
+      "Yes — based on client reviews on this site, several started on the Foundation tier and added LinkedIn or calling once the first channel was producing meetings. Adding channels increases the monthly fee proportionally.",
+  },
+  {
+    question: "Is SmarterOutbound worth it for a small business or solo founder?",
+    answer:
+      "At sub-$50k MRR or pre-product-market-fit, the engagement cost is typically too high relative to runway. Multiple 2-3 star reviews on this site call this out — the wrong-stage fit is the most common reason for a poor outcome. Consider self-serve tools (Apollo, Lemlist) until you're past that threshold.",
+  },
+  {
+    question: "How does pricing compare to hiring an internal SDR?",
+    answer:
+      "A fully loaded SDR (salary, benefits, tooling, manager time) typically runs $120-150k/year — about $10-12k/month. The Foundation tier at $2,500/month is meaningfully cheaper than one SDR; the Multi-Channel tier at $4,500/month is still cheaper. The Full Outbound Engine custom tier ($8-15k/month) competes with the cost of one fully-loaded SDR but covers more channels and ramps faster (week 4 to first meetings vs 4-6 months for a new hire to reach productivity).",
+  },
+];
+
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Pricing" },
+];
+
+const jsonLD = [
+  getBreadcrumbSchema(breadcrumbItems),
+  getFAQSchema(pricingFaqs),
+];
+---
+
+<MainLayout
+  title="SmarterOutbound Pricing — Tiers, What's Included, Who It's For"
+  description="SmarterOutbound pricing: Outbound Foundation $2,500/mo, Multi-Channel Pipeline $4,500/mo, Full Outbound Engine custom. What each tier includes, who each tier is best for, which tier each verified client review used. Honest cost guidance, not vendor marketing."
+  jsonLD={jsonLD}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <header class="mb-10 pb-8 border-b border-gray-100">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+        SmarterOutbound pricing — tiers, what's included, who it's for
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed max-w-2xl">
+        Three published tiers from {siteData.parentSite.name}. Below: what each one includes, honest "not for" guidance, and which tier each verified client review on this site actually used. Pricing reflects what's listed on smarteroutbound.com as of May 2026 — verify current rates direct.
+      </p>
+    </header>
+
+    <!-- Tier grid -->
+    <section class="space-y-6 mb-12">
+      {tierData.map((t) => (
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
+          <div class="flex items-start justify-between gap-4 mb-3 flex-wrap">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-primary-600 mb-1">{t.badge}</div>
+              <h2 class="text-2xl font-bold text-gray-900">{t.name}</h2>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-extrabold text-gray-900">{t.price}</div>
+              <div class="text-xs text-gray-500">{t.reviews.length} verified client reviews used this tier</div>
+            </div>
+          </div>
+          <p class="text-base text-gray-700 leading-relaxed mb-5">{t.blurb}</p>
+
+          <div class="grid sm:grid-cols-2 gap-5">
+            <div>
+              <h3 class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">What's included</h3>
+              <ul class="space-y-1.5">
+                {t.includes.map((line) => (
+                  <li class="flex items-start gap-2 text-sm text-gray-700 leading-relaxed">
+                    <svg class="w-4 h-4 text-success-500 mt-0.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="m7 13.59-3.79-3.8 1.41-1.41L7 10.76l8.38-8.38 1.41 1.42z" />
+                    </svg>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="space-y-3">
+              <div class="bg-success-50 border border-success-500/20 rounded-lg p-3">
+                <div class="text-xs font-bold uppercase tracking-wider text-success-600 mb-1">Best fit</div>
+                <p class="text-xs text-gray-700 leading-relaxed">{t.bestFor}</p>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Not for</div>
+                <p class="text-xs text-gray-700 leading-relaxed">{t.notFor}</p>
+              </div>
+            </div>
+          </div>
+
+          {t.reviews.length > 0 && (
+            <div class="mt-6 pt-5 border-t border-gray-100">
+              <h3 class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3">Real reviews from clients on this tier</h3>
+              <div class="grid sm:grid-cols-2 gap-3">
+                {t.reviews.slice(0, 4).map((r) => (
+                  <a
+                    href={`/reviews/${r.id}`}
+                    class="group flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors no-underline"
+                  >
+                    <StarRating rating={r.data.rating} size="sm" />
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors leading-snug line-clamp-2">
+                        {r.data.title}
+                      </div>
+                      <div class="text-xs text-gray-500 mt-0.5">
+                        {r.data.reviewer}{r.data.reviewerCompany && ` · ${r.data.reviewerCompany}`}
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              {t.reviews.length > 4 && (
+                <p class="text-xs text-gray-400 mt-3">+ {t.reviews.length - 4} more reviews on this tier</p>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+
+    <!-- FAQs (FAQPage schema) -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Pricing FAQs</h2>
+      <p class="text-sm text-gray-500 mb-6">Common pricing questions before booking a discovery call.</p>
+      <div class="faq-accordion">
+        {pricingFaqs.map((faq, i) => (
+          <details open={i === 0}>
+            <summary>{faq.question}</summary>
+            <div class="faq-answer">{faq.answer}</div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <CtaBlock
+      variant="boxed"
+      heading="Want pricing for your specific situation?"
+      body="SmarterOutbound publishes the tiers above. Custom Full Engine pricing depends on volume, channels, and reporting needs. Talk to the team for a quote scoped to your business."
+      ctaLabel="Get a custom quote on SmarterOutbound.com"
+    />
+  </div>
+</MainLayout>

@@ -1,9 +1,18 @@
 ---
+import { getCollection } from "astro:content";
 import MainLayout from "./MainLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
+import StarRating from "../components/StarRating.astro";
 import CtaBlock from "../components/CtaBlock.astro";
 import { formatDate, getReadingTime } from "../js/utils.ts";
 import { getComparisonSchema, getBreadcrumbSchema, getFAQSchema } from "../js/jsonLD.ts";
+import { industries } from "../data/industries.ts";
+
+function industryUrlForTag(tag: string): string | null {
+  const lower = tag.toLowerCase();
+  const match = industries.find((i) => i.tagFilters.includes(lower));
+  return match ? `/industries/${match.slug}` : null;
+}
 
 const { frontmatter, headings, rawContent } = Astro.props;
 const {
@@ -41,6 +50,20 @@ const jsonLD: any[] = [compSchema, breadcrumbSchema];
 if (faqs.length > 0) jsonLD.push(getFAQSchema(faqs));
 
 const aiSummaryMeta = verdict || description;
+
+// Related reviews — score by tag overlap with this comparison, top 3
+const allReviews = (await getCollection("reviews")).filter((r) => !r.data.draft);
+const currentTagSet = new Set((tags || []).map((t: string) => t.toLowerCase()));
+const relatedReviews = allReviews
+  .map((r) => {
+    const otherTags = new Set((r.data.tags || []).map((t: string) => t.toLowerCase()));
+    let overlap = 0;
+    for (const t of currentTagSet) if (otherTags.has(t)) overlap++;
+    return { entry: r, overlap };
+  })
+  .filter((x) => x.overlap > 0)
+  .sort((a, b) => b.overlap - a.overlap || +new Date(b.entry.data.date) - +new Date(a.entry.data.date))
+  .slice(0, 3);
 ---
 
 <MainLayout
@@ -85,11 +108,21 @@ const aiSummaryMeta = verdict || description;
 
       {tags.length > 0 && (
         <div class="flex gap-2 flex-wrap mt-4">
-          {tags.map((tag: string) => (
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-              {tag}
-            </span>
-          ))}
+          {tags.map((tag: string) => {
+            const url = industryUrlForTag(tag);
+            return url ? (
+              <a
+                href={url}
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors no-underline"
+              >
+                {tag}
+              </a>
+            ) : (
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                {tag}
+              </span>
+            );
+          })}
         </div>
       )}
     </header>
@@ -134,6 +167,43 @@ const aiSummaryMeta = verdict || description;
               <div class="faq-answer">{faq.answer}</div>
             </details>
           ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Related reviews — internal linking from comparison to real client outcomes -->
+    {relatedReviews.length > 0 && (
+      <section class="mt-14 pt-10 border-t border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Real client outcomes that informed this comparison</h2>
+        <p class="text-sm text-gray-500 mb-6">Reviews from clients who weighed the same trade-offs.</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {relatedReviews.map(({ entry }) => (
+            <a
+              href={`/reviews/${entry.id}`}
+              class="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-sm transition-all no-underline"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <StarRating rating={entry.data.rating} size="sm" showValue />
+                <time class="text-xs text-gray-400" datetime={entry.data.date.toISOString()}>
+                  {formatDate(entry.data.date)}
+                </time>
+              </div>
+              <h3 class="text-sm font-bold text-gray-900 group-hover:text-primary-700 transition-colors leading-snug mb-1.5">
+                {entry.data.title}
+              </h3>
+              <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">{entry.data.summary}</p>
+              {entry.data.reviewer && (
+                <div class="text-xs text-gray-400 mt-2">
+                  {entry.data.reviewer}{entry.data.reviewerCompany && ` · ${entry.data.reviewerCompany}`}
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+          <a href="/reviews" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">All reviews →</a>
+          <a href="/industries" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">Browse by industry →</a>
+          <a href="/data" class="text-primary-600 hover:text-primary-700 font-semibold no-underline">Aggregate data →</a>
         </div>
       </section>
     )}

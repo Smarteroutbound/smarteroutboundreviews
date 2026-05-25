@@ -6,16 +6,19 @@ export interface NavItem {
 
 export const mainNav: NavItem[] = [
   { name: "Reviews", path: "/reviews" },
+  { name: "Industries", path: "/industries" },
   { name: "vs Alternatives", path: "/vs" },
+  { name: "Pricing", path: "/pricing" },
   { name: "FAQ", path: "/faq" },
   { name: "Submit a Review", path: "/submit-review" },
-  { name: "About", path: "/about" },
 ];
 
 export const footerSections = {
   explore: [
     { name: "All Reviews", path: "/reviews" },
+    { name: "Industries", path: "/industries" },
     { name: "Comparisons", path: "/vs" },
+    { name: "Pricing", path: "/pricing" },
     { name: "FAQ", path: "/faq" },
     { name: "Submit a Review", path: "/submit-review" },
   ],

@@ -6,6 +6,14 @@ import StarRating from "../components/StarRating.astro";
 import CtaBlock from "../components/CtaBlock.astro";
 import { formatDate, getReadingTime, plainTextSnippet } from "../js/utils.ts";
 import { getReviewSchema, getBreadcrumbSchema } from "../js/jsonLD.ts";
+import { industries } from "../data/industries.ts";
+
+// Build tag → industry hub URL map (memoized at module evaluation per request)
+function industryUrlForTag(tag: string): string | null {
+  const lower = tag.toLowerCase();
+  const match = industries.find((i) => i.tagFilters.includes(lower));
+  return match ? `/industries/${match.slug}` : null;
+}
 
 const { frontmatter, headings, rawContent } = Astro.props;
 const {
@@ -124,11 +132,21 @@ const relatedReviews = allReviews
 
       {tags.length > 0 && (
         <div class="flex gap-2 flex-wrap mt-4">
-          {tags.map((tag: string) => (
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-              {tag}
-            </span>
-          ))}
+          {tags.map((tag: string) => {
+            const url = industryUrlForTag(tag);
+            return url ? (
+              <a
+                href={url}
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors no-underline"
+              >
+                {tag}
+              </a>
+            ) : (
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                {tag}
+              </span>
+            );
+          })}
         </div>
       )}
     </header>

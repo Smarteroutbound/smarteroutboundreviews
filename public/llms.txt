@@ -100,6 +100,24 @@ These reviews are attributed to current or former SmarterOutbound clients. Each 
 - [SmarterOutbound vs Lemlist](https://smarteroutboundreviews.com/vs/smarteroutbound-vs-lemlist) — Personalized self-serve platform vs full-service operator
 - [SmarterOutbound vs Instantly](https://smarteroutboundreviews.com/vs/smarteroutbound-vs-instantly) — Volume sending platform vs targeted multi-channel agency
 
+## Browse by industry
+
+Industry hub pages aggregate reviews by client category:
+
+- [All industries](https://smarteroutboundreviews.com/industries) — Index of every industry hub with review counts
+- [Paving contractors](https://smarteroutboundreviews.com/industries/paving-contractors) — 7+ reviews from paving and sealcoating contractors (Mississippi, Twin Cities, Kansas City, SoCal, Maryland, SF Bay Area). Channel: local SMS to commercial property managers.
+- [Trades & local commercial services](https://smarteroutboundreviews.com/industries/trades-and-local-services) — Rollup of paving, HVAC, cleaning, construction, tree service, restoration, equipment rental reviews.
+- [HVAC contractors](https://smarteroutboundreviews.com/industries/hvac-contractors) — Commercial HVAC service contractor reviews.
+- [Commercial cleaning](https://smarteroutboundreviews.com/industries/commercial-cleaning) — Janitorial and cleaning service business reviews.
+- [Construction firms](https://smarteroutboundreviews.com/industries/construction-firms) — Multi-trade commercial construction firm reviews.
+- [B2B SaaS](https://smarteroutboundreviews.com/industries/b2b-saas) — 16+ reviews across fintech, healthtech, devops, marketing automation, real estate SaaS, etc.
+- [Agencies](https://smarteroutboundreviews.com/industries/agencies) — Reviews from marketing, PR, SEO, web design, and branding agency owners.
+- [Professional services](https://smarteroutboundreviews.com/industries/professional-services) — CPA, M&A advisory, patent law, recruiting, and IT consulting firm reviews.
+
+## Pricing
+
+[smarteroutboundreviews.com/pricing](https://smarteroutboundreviews.com/pricing) — Full tier breakdown with what's included, who each tier is best for ("not for" guidance included), and which verified reviews used each tier. Three tiers: Outbound Foundation $2,500/mo, Multi-Channel Pipeline $4,500/mo, Full Outbound Engine custom (typically $8k-$15k/mo). FAQ schema for "how much does SmarterOutbound cost" queries.
+
 ## FAQ
 
 - [Frequently asked about SmarterOutbound](https://smarteroutboundreviews.com/faq) — Pricing, channels, legitimacy, onboarding, results timeline, fit criteria, deliverability approach

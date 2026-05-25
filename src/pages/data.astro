@@ -146,7 +146,7 @@ function fmtDate(t: number | undefined) {
 ---
 
 <MainLayout
-  title="Aggregate review data & statistics"
+  title={`SmarterOutbound Rating Data — ${aggregateRating.toFixed(1)}/5 Across ${total} Verified Reviews`}
   description={`Aggregate statistics across ${total} verified client reviews of SmarterOutbound: average rating ${aggregateRating.toFixed(1)}/5, full rating distribution, channel breakdown, industry breakdown, service tier mix. Published by SmarterOutbound, auto-updated each build.`}
   jsonLD={jsonLD}
 >

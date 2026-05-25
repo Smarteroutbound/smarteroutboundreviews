@@ -47,6 +47,27 @@ export function getWebsiteSchema() {
   };
 }
 
+/* ===== ItemList (for collection pages like /reviews, /vs, /industries) ===== */
+export function getItemListSchema(opts: {
+  name: string;
+  description?: string;
+  items: { name: string; url: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: opts.name,
+    ...(opts.description && { description: opts.description }),
+    numberOfItems: opts.items.length,
+    itemListElement: opts.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: item.url.startsWith("http") ? item.url : `${siteData.url}${item.url}`,
+    })),
+  };
+}
+
 /* ===== Breadcrumbs ===== */
 export function getBreadcrumbSchema(items: { name: string; url?: string }[]) {
   return {

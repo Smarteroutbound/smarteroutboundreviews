@@ -7,6 +7,7 @@ import { formatDate, average } from "../../js/utils.ts";
 import {
   getBreadcrumbSchema,
   getAggregateRatingSchema,
+  getItemListSchema,
 } from "../../js/jsonLD.ts";
 import RatingDistribution from "../../components/RatingDistribution.astro";
 import TrustBadges from "../../components/TrustBadges.astro";
@@ -27,14 +28,21 @@ const breadcrumbItems = [
 const jsonLD = [
   getBreadcrumbSchema(breadcrumbItems),
   ...(reviewCount > 0
-    ? [getAggregateRatingSchema({ ratingValue: aggregateRating, reviewCount })]
+    ? [
+        getAggregateRatingSchema({ ratingValue: aggregateRating, reviewCount }),
+        getItemListSchema({
+          name: "All SmarterOutbound client reviews",
+          description: `${reviewCount} verified client reviews of SmarterOutbound across multiple industries and channels.`,
+          items: sorted.map((r) => ({ name: r.data.title, url: `/reviews/${r.id}` })),
+        }),
+      ]
     : []),
 ];
 ---
 
 <MainLayout
-  title="All SmarterOutbound Reviews"
-  description={`Browse ${reviewCount} verified client reviews of SmarterOutbound from across B2B SaaS, agencies, professional services, and commercial trades. Published by SmarterOutbound under a written editorial policy — non-incentivized, critical reviews included.`}
+  title={`SmarterOutbound Client Reviews — ${reviewCount} Verified, ${aggregateRating.toFixed(1)}/5 Avg`}
+  description={`${reviewCount} verified client reviews of SmarterOutbound from B2B SaaS founders, paving and construction contractors, agencies, and professional services firms. Cold email, LinkedIn, SMS, and calling campaigns. Published by SmarterOutbound under a written editorial policy.`}
   jsonLD={jsonLD}
 >
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
@@ -42,10 +50,10 @@ const jsonLD = [
 
     <header class="mb-10 pb-8 border-b border-gray-100">
       <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
-        SmarterOutbound Reviews
+        SmarterOutbound Client Reviews — Cold Email, SMS, LinkedIn &amp; Calling
       </h1>
       <p class="text-lg text-gray-600 leading-relaxed mb-5 max-w-2xl">
-        Every published review of SmarterOutbound, organized by date. Non-incentivized, with negative reviews published alongside positive ones. <a href="/editorial-policy" class="text-primary-600 hover:text-primary-700 underline">Editorial policy</a>.
+        {reviewCount} verified reviews from B2B SaaS founders, paving and construction contractors, agencies, and professional services firms. Non-incentivized, with critical reviews published alongside positive ones. <a href="/editorial-policy" class="text-primary-600 hover:text-primary-700 underline">Editorial policy</a> &middot; <a href="/industries" class="text-primary-600 hover:text-primary-700 underline">Browse by industry</a>.
       </p>
       {reviewCount > 0 && (
         <div class="grid md:grid-cols-[auto_1fr] gap-5 items-start">
