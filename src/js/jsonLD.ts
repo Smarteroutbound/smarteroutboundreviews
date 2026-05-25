@@ -28,6 +28,11 @@ export const reviewedOrganization = {
   legalName: parent.legalName,
   url: parent.url,
   description: parent.description,
+  sameAs: [
+    "https://www.linkedin.com/company/smarteroutbound/",
+    // TODO: add G2, Clutch, Trustpilot URLs once those profiles exist
+    // — those are the only path to star rich results in Google SERPs.
+  ],
 };
 
 /* ===== Website ===== */

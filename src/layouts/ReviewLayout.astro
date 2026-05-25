@@ -4,7 +4,7 @@ import MainLayout from "./MainLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import StarRating from "../components/StarRating.astro";
 import CtaBlock from "../components/CtaBlock.astro";
-import { formatDate, getReadingTime } from "../js/utils.ts";
+import { formatDate, getReadingTime, plainTextSnippet } from "../js/utils.ts";
 import { getReviewSchema, getBreadcrumbSchema } from "../js/jsonLD.ts";
 
 const { frontmatter, headings, rawContent } = Astro.props;
@@ -32,10 +32,12 @@ const breadcrumbItems = [
 ];
 
 const summaryText = summary || `Review of SmarterOutbound by ${reviewer}`;
+// reviewBody for schema: actual review content (not just summary) for richer crawler signal
+const reviewBodyText = rawContent ? plainTextSnippet(rawContent(), 500) : summaryText;
 
 const reviewSchema = getReviewSchema({
   title,
-  body: summaryText,
+  body: reviewBodyText,
   url: Astro.url.href,
   rating,
   author: reviewer,

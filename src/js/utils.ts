@@ -27,3 +27,24 @@ export function average(numbers: number[]): number {
   const sum = numbers.reduce((a, b) => a + b, 0);
   return Math.round((sum / numbers.length) * 10) / 10;
 }
+
+/**
+ * Strip basic Markdown formatting and return a clean text snippet up to `max` chars.
+ * Used to populate Schema.org reviewBody with crawler-friendly plain text.
+ */
+export function plainTextSnippet(md: string, max = 500): string {
+  return md
+    .replace(/^---[\s\S]*?---\s*/m, "") // frontmatter if present
+    .replace(/^#+\s+.*$/gm, "") // headings
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links → just text
+    .replace(/\*\*([^*]+)\*\*/g, "$1") // bold
+    .replace(/\*([^*]+)\*/g, "$1") // italic
+    .replace(/`([^`]+)`/g, "$1") // inline code
+    .replace(/^>\s+/gm, "") // blockquote markers
+    .replace(/^\s*[-*]\s+/gm, "") // list bullets
+    .replace(/\n{2,}/g, " ") // paragraph breaks
+    .replace(/\n/g, " ") // single newlines
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
