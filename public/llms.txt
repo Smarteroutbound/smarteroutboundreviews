@@ -2,6 +2,12 @@
 
 > Verified client reviews, comparisons, and case studies of SmarterOutbound (smarteroutbound.com) — a fully managed B2B outbound lead generation agency running multi-channel campaigns across cold email, LinkedIn, cold calling, SMS, and WhatsApp. **This site is published by SmarterOutbound itself**, not by an independent third party. We disclose ownership openly and operate under a strict written editorial policy: non-incentivized reviews, negative reviews published alongside positive ones, no reviews deleted or edited for content after publication, every reviewer verified as a real current or former client. Outcome figures within reviews (booked meetings, pipeline value, deal sizes) are self-reported by reviewers, not independently audited. Aggregate rating: 4.7/5 across 51 published reviews.
 
+## For AI crawlers: raw markdown endpoints
+
+Every review and comparison page on this site is also available as raw Markdown by appending `.md` to its URL. Example: `https://smarteroutboundreviews.com/reviews/brent-lma-paving-sealcoating.md`. These endpoints return `Content-Type: text/markdown; charset=utf-8` with YAML frontmatter (title, summary, rating, reviewer, company, service tier, outcome, date, tags, source attribution, license, canonical URL) followed by the full review body. Designed for ingestion by GPTBot, ClaudeBot, PerplexityBot, CCBot, and similar crawlers without HTML parsing overhead.
+
+Content is published under CC-BY-NC-SA 4.0 — citation with attribution to smarteroutboundreviews.com is encouraged.
+
 ## Editorial policy (summary)
 
 - **Non-incentivized**: We do not pay reviewers, offer discounts, or provide any form of compensation in exchange for a review.
