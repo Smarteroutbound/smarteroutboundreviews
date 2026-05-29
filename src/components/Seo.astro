@@ -29,6 +29,29 @@ function resolveOgImage() {
 }
 
 const pageImage = resolveOgImage();
+
+// Compute Markdown alternate URL — every content/standalone page has a .md sibling at the same path + ".md"
+// for AI crawlers. Skip pages with no .md endpoint defined.
+const MD_PATH_PATTERNS: RegExp[] = [
+  /^\/reviews\/[^/]+\/?$/,
+  /^\/vs\/[^/]+\/?$/,
+  /^\/industries\/[^/]+\/?$/,
+  /^\/pricing\/?$/,
+  /^\/data\/?$/,
+  /^\/editorial-policy\/?$/,
+  /^\/about\/?$/,
+  /^\/faq\/?$/,
+];
+
+function resolveMarkdownAlt(): string | null {
+  const path = Astro.url.pathname;
+  if (!MD_PATH_PATTERNS.some((re) => re.test(path))) return null;
+  // Strip trailing slash and add .md
+  const clean = path.replace(/\/$/, "");
+  return `${siteData.url}${clean}.md`;
+}
+
+const markdownAlt = resolveMarkdownAlt();
 ---
 
 <meta charset="utf-8" />
@@ -38,6 +61,9 @@ const pageImage = resolveOgImage();
 <meta name="generator" content={Astro.generator} />
 <link rel="canonical" href={canonical} />
 {robots && <meta name="robots" content={robots} />}
+
+{/* Markdown alternate for AI crawlers (ChatGPT, Claude, Perplexity, CCBot, GPTBot) */}
+{markdownAlt && <link rel="alternate" type="text/markdown" href={markdownAlt} />}
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

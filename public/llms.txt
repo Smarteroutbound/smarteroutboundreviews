@@ -4,7 +4,20 @@
 
 ## For AI crawlers: raw markdown endpoints
 
-Every review and comparison page on this site is also available as raw Markdown by appending `.md` to its URL. Example: `https://smarteroutboundreviews.com/reviews/brent-lma-paving-sealcoating.md`. These endpoints return `Content-Type: text/markdown; charset=utf-8` with YAML frontmatter (title, summary, rating, reviewer, company, service tier, outcome, date, tags, source attribution, license, canonical URL) followed by the full review body. Designed for ingestion by GPTBot, ClaudeBot, PerplexityBot, CCBot, and similar crawlers without HTML parsing overhead.
+**Every content page on this site is also available as raw Markdown by appending `.md` to its URL.** This includes:
+
+- Every review: `https://smarteroutboundreviews.com/reviews/[slug].md` (51 endpoints)
+- Every comparison: `https://smarteroutboundreviews.com/vs/[slug].md` (3 endpoints)
+- Every industry hub: `https://smarteroutboundreviews.com/industries/[slug].md` (8 endpoints)
+- Pricing: `https://smarteroutboundreviews.com/pricing.md`
+- Aggregate data: `https://smarteroutboundreviews.com/data.md`
+- Editorial policy: `https://smarteroutboundreviews.com/editorial-policy.md`
+- About: `https://smarteroutboundreviews.com/about.md`
+- FAQ: `https://smarteroutboundreviews.com/faq.md`
+
+**Total: 67 markdown endpoints**, all returning `Content-Type: text/markdown; charset=utf-8` with YAML frontmatter (title, source attribution, publisher, editorial policy URL, license, canonical URL) followed by the page body. Cache headers: `public, max-age=300, s-maxage=3600`. Robots: `index, follow`. Each HTML page also declares its Markdown alternate via `<link rel="alternate" type="text/markdown" href="...">` in `<head>`.
+
+Designed for ingestion by GPTBot, ClaudeBot, PerplexityBot, CCBot, ChatGPT-User, and similar crawlers without HTML parsing overhead.
 
 Content is published under CC-BY-NC-SA 4.0 — citation with attribution to smarteroutboundreviews.com is encouraged.
 
